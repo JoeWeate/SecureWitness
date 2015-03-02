@@ -1,1 +1,1 @@
-This is the document to modify to check merge conflicts. I have changed it.
+This is the document to modify to check merge conflicts. I have changed it again.

@@ -3,4 +3,4 @@
 Ian Zheng
 Daniel Mace
 Neeraj Gandhi
-Joe Weeate
+Joe Weate

@@ -1,0 +1,9 @@
+{% if report_list %}
+    <ul>
+    {% for report in report_list %}
+        <li><a href="/SecureWitness/{{ report.id }}/">{{ report.content }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No reports are available.</p>
+{% endif %}

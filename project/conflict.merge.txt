@@ -1,5 +1,0 @@
-<<<<<<< HEAD
-This is the document to modify to check merge conflicts. I have changed it again but different.
-=======
-This is the document to modify to check merge conflicts. I have changed it again. This time its different.
->>>>>>> master

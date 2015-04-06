@@ -1,0 +1,102 @@
+<html>
+<link href="/static/bootstrap.css" rel="stylesheet">
+<script src="/static/jquery-1.10.2.js"></script>
+<script src="/static/bootstrap.js"></script>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Secure Witness</title>
+    <link rel="shortcut icon" href="/static/favicon.ico">
+
+<style type="text/css">
+
+body {
+  background: url("http://marshall-design.com/codepen/abs6.jpg");
+}
+
+h2 {
+    color:#bbb;
+    font-size:5em;
+	text-align:center;
+	text-shadow:0 1px 3px #161616;
+}
+
+.container {width: 960px; margin: 0 auto; overflow: hidden;}
+
+#content {	float: left; width: 100%;}
+
+.post { margin: 0 auto; padding-bottom: 50px; float: left; width: 960px; }
+
+.btn-sign {
+	width:460px;
+	margin-bottom:10px;
+    margin-top: 10px;
+	margin:auto;
+    padding:6px 6px 4px;
+	border-radius:5px;
+	text-align:center;
+	font-size:36px;
+	color:#fff;
+	text-transform:uppercase;
+}
+
+.btn-sign a { color:#fff; text-shadow:0 1px 2px #161616; }
+
+
+
+</style>
+
+
+   <div class="modal fade" id="loginModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Sign In</h4>
+      </div>
+      <div class="modal-body">
+{% block content %}
+     <form action="/accounts/auth/" method="post">{% csrf_token %}
+                <div class="form-group">
+                  <input class="form-control" placeholder="Username" name="username" value="" type="text" id="username" required>
+              </div>
+              <div class="form-group">
+                <input class="form-control" placeholder="Password" name="password" value="" type="password" id="password"required>
+              </div>
+
+       <div class="modal-footer">
+
+        <button style="margin-right:10px;"type="submit" id="login" name="login" value="login" class="btn btn-success btn-padding">Log In</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+
+      </div></form>
+
+
+{% endblock %}
+
+        <div id="error_log">
+
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</head>
+<body>
+<div class="container">
+	<div id="content">
+
+		<div class="post">
+    	<h2>Secure Witness</h2>
+        	<div class="btn-sign">
+                <button id="sigIn_button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loginModal" data-backdrop="static" style="height:50px; width:400px">Login</button>
+        	     </div>
+            <div class="btn-sign">
+                <button id="reg_button" class="btn btn-info btn-lg"  onclick="window.location.href='/accounts/register'"  data-backdrop="static" style="height:50px; width:400px">Register</button>
+            </div>
+		</div>
+
+    </div>
+</div>
+
+</body>
+
+</html>

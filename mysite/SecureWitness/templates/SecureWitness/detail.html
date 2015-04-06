@@ -1,1 +1,13 @@
-{{ report.content }}
+{{ report.content }} by {{ report.author }} at {{report.pub_date}}
+<br>
+Edit Content:
+<br>
+
+<form action="/SecureWitness/edit_report/" action="post">
+{% csrf_token %}
+    author: <input type='text' name = 'author' value ='{{report.id}}'><br>
+    content: <input type='text' name = 'content' value = '{{report.content}}'><br>
+<input type="submit" value="Edit Report" />
+<br>
+</form>
+<a href = "/SecureWitness/">Home</a>

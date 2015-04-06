@@ -11,11 +11,24 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='Folder',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
+                ('author', models.CharField(max_length=30)),
+                ('name', models.CharField(max_length=30)),
+                ('create_date', models.DateTimeField(verbose_name='date published')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='Report',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)),
+                ('author', models.CharField(max_length=30)),
+                ('pub_date', models.DateTimeField(verbose_name='date published')),
                 ('content', models.CharField(max_length=200)),
-                ('put_date', models.DateTimeField(verbose_name='date published')),
             ],
             options={
             },

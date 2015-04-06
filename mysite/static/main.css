@@ -1,0 +1,60 @@
+body{
+	margin:0px;
+	padding:0px;
+	position:relative;
+
+}
+
+body {
+  background: url(puzzle.jpeg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+;
+}
+
+#main{
+
+	width:50%;
+	height:70vh;
+	margin:0px auto;
+	position:relative;
+	top:100px;
+	border-radius:5%;
+
+
+}
+#buttons{
+	position:relative;
+	top:30vh;
+	opacity:1;
+
+}
+
+#first_button{
+
+	opacity:10;
+
+}
+
+#second_button{
+
+	opacity:1;
+
+}
+
+#buttons button{
+
+	display:block;
+	width:75%;
+	margin:0px auto;
+	margin-bottom:30px;
+
+}
+
+#first_button{
+
+	margin-bottom:40px;
+
+}

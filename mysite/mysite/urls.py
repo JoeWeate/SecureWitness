@@ -10,4 +10,5 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^SecureWitness/', include('SecureWitness.urls')),
+    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
 )

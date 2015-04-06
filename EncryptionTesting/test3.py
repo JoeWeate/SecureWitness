@@ -1,6 +1,8 @@
 import os
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_v1_5
+from Crypto import Random
 
 #BASE_DIR = os.path.dirname(os.path.abspath(__file__)))
 #ENCRYP_DIR = os.path.join(BASE_DIR, "encrypted.txt")
@@ -11,6 +13,9 @@ if __name__ == "__main__":
 
 	cipher = PKCS1_v1_5.new(pubKey)
 
+	signkey = b"This is my signature"
+	iv = Random.new().read(AES.block_size)
+	signcipher = AES.new(signkey, AES.MODE_CFB, iv)
 	
 	encryptedbytes = b''#cipher.encrypt("Hello!".encode('utf-8'))
 	with open("testtext.txt", 'r') as f:

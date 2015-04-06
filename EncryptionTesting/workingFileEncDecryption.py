@@ -3,14 +3,13 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.Cipher import PKCS1_OAEP
-from Crypto.Signature import PKCS1_v1_5
 from Crypto import Random
 
 
 
 
 #encrypt a file
-def encrypt_file(key, RSAkey, infile, outfile=None, chunksize=64*1024):
+def encrypt_file(key, infile, outfile=None, chunksize=64*1024):
 	if not outfile:
 		outfile = infile + ".enc"
 
@@ -34,56 +33,32 @@ def encrypt_file(key, RSAkey, infile, outfile=None, chunksize=64*1024):
 					chunk += (' ' * (16- len(chunk)%16)).encode('utf-8')
 				output.write(encryptor.encrypt(chunk))
 
-	with open('signature.pem', 'wb') as signer:
-		privKey = RSAkey
-		pubKey  = privKey.publickey()
-		cipher  = PKCS1_v1_5.new(privKey)
-		msg     = SHA256.new(key.encode('utf-8'))
-		signature = cipher.sign(msg)
-		signer.write(signature)
-
-def decrypt_file(key, RSAkey, infile, outfile=None, chunksize = 24*1024):
-	#print(chunksize)
+def decrypt_file(key, infile, outfile=None, chunksize = 24*1024):
 	if not outfile:
 		outfile = os.path.splitext(infile)[0]
 
-	with open('signature.pem', 'rb') as verifier:
-		part1 = verifier.read()
-		privKey = RSAkey
-		pubKey = privKey.publickey()
-		cipher = PKCS1_v1_5.new(pubKey)
-		msg = SHA256.new(key.encode('utf-8'))
-		
-		#print (signature, " matches? ", fromfile)
+	with open(infile, 'rb') as inp:
+		origsize = struct.unpack('<Q', inp.read(struct.calcsize('Q')))[0]
+		iv = inp.read(16).decode('utf-8')
+		decryptor = AES.new(key, AES.MODE_CBC, iv)
 
-		if cipher.verify(msg, part1) :
+		with open(outfile, 'wb') as output:
+			while True:
+				chunk = inp.read(chunksize)
+				if len(chunk) == 0:
+					break
+				output.write(decryptor.decrypt(chunk))
 
-			with open(infile, 'rb') as inp:
-				origsize = struct.unpack('<Q', inp.read(struct.calcsize('Q')))[0]
-				iv = inp.read(16).decode('utf-8')
-				decryptor = AES.new(key, AES.MODE_CBC, iv)
-		
-				with open(outfile, 'wb') as output:
-					while True:
-						chunk = inp.read(chunksize)
-						if len(chunk) == 0:
-							break
-						output.write(decryptor.decrypt(chunk))
-		
-					output.truncate(origsize)
-
-		else:
-			with open(outfile, 'w') as output:
-				output.write('Signature did not match, cannot decrypt the file for you. Please try again.')
+			output.truncate(origsize)
 		
 
 #BASE_DIR = os.path.dirname(os.path.abspath(__file__)))
 #ENCRYP_DIR = os.path.join(BASE_DIR, "encrypted.txt")
 
 if __name__ == "__main__":
-	RSAkey = RSA.generate(2048)
-	encrypt_file('aaaaaaaaaaaaaaaa', RSAkey, 'testtext.txt', 'output.txt')
-	decrypt_file('aaaaaaaaaaaaaaab', RSAkey, 'output.txt'  , 'decrypted.txt')
+
+	encrypt_file('aaaaaaaaaaaaaaaa', 'testtext.txt', 'output.txt')
+	decrypt_file('aaaaaaaaaaaaaaaa', 'output.txt'  , 'decrypted.txt')
 
 if __name__ == "__main2__":
 

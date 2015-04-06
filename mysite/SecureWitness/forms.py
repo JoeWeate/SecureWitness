@@ -7,3 +7,10 @@ class UserForm(forms.ModelForm):
 	class Meta:
 		model = User
 		fields = ('username', 'email', 'password', 'first_name', 'last_name')
+
+class DocumentForm(forms.Form):
+	docfile = forms.FileField(
+		label='Select a file',
+		help_text='max. 42 megabytes'
+	)
+

@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 
 # Create your views here.
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
 from SecureWitness.forms import DocumentForm
 
@@ -18,11 +19,12 @@ from django.template import RequestContext
 
 
 def index(request):
-    report_list = Report.objects.order_by('-pub_date')[:5]
-    output = ""
-    for p in report_list:
-        output="Author: "+p.author.username+'\n'+"Published date: "+str(p.pub_date)+'\n'+"Content: "+p.short+'\n'
-    return HttpResponse(output)
+    if not request.user.is_authenticated():
+        return redirect('/accounts/login/')
+    else:
+        name = request.user.username
+        report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+    return render(request,'SecureWitness/index.html',{'report_list': report_list,'name':name})
 
 def register(request):
 	# Like before, get the request's context.
@@ -100,3 +102,18 @@ def list(request):
 		{'documents': documents, 'form': form},
 		context_instance=RequestContext(request)
 	)
+
+def detail(request, report_id):
+    try:
+        report = Report.objects.get(pk=report_id)
+    except Report.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'SecureWitness/detail.html', {'report':report})
+
+def create(request):
+    return render(request, 'SecureWitness/create.html')
+
+def create_report(request):
+    report = Report(author = request.user, short = request.GET['content'])
+    report.save()
+    return HttpResponse('success')

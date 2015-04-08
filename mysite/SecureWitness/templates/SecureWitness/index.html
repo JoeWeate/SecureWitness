@@ -1,0 +1,19 @@
+Welcome {{name}}!
+
+{% if report_list %}
+    <ul>
+    {% for report in report_list %}
+        <li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
+    {% endfor %}
+
+    </ul>
+{% else %}
+    <p>No reports are available.</p>
+{% endif %}
+
+
+<!-- {% for folder in folder_list %}
+    	<li>{{folder.name}}</li>
+{% endfor %} -->
+
+<a href="create">Create Report</a>

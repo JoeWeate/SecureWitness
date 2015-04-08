@@ -12,7 +12,7 @@ class Keyword(models.Model):
 
 class Report(models.Model):
 	# User who created report
-	author = models.OneToOneField(User)
+	author = models.ForeignKey(User)
 	# Date of publication
 	pub_date = models.DateTimeField(default=datetime.datetime.today)
 	# Date and time of incident

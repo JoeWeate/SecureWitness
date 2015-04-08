@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from SecureWitness.models import Report
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -14,3 +15,8 @@ class DocumentForm(forms.Form):
 		help_text='max. 42 megabytes'
 	)
 
+class ReportForm(forms.ModelForm):
+	class Meta:
+		model = Report
+		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
+		widgets = {'author':forms.HiddenInput()}

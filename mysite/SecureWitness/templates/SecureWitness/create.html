@@ -1,27 +1,9 @@
 Create a report
 
+<form id="report_form" method="post" action="/SecureWitness/success/"
+			enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ report_form.as_p }}
 
-<form action="/SecureWitness/create_report/" action="get">
-{% csrf_token %}
-	Short Description:
-	<br><input type="text" name = "short">
-	<br>
-    content: 
-    <br><textarea name = 'content' rows="8" cols="0"></textarea>
-    <br>
-    Privacy:
-    <br>
-	<input type="radio" name="privacy" value="True">Private<br>
-	<input type="radio" name="privacy" value="False">Public<br>
-	Location:
-	<br>
-	<input type="text" name="location"><br>
-	Keyword:
-	<br>
-	<input type="text" name="Keyword">
-    <br>
-<input type="submit" value="Create Report" />
-<br>
-<a href='/SecureWitness/logout'>Logout</a>
-
+		<input type="submit" name="submit" value="Create Report" />
 </form>

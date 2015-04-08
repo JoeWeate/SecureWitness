@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm
+from SecureWitness.forms import DocumentForm, ReportForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -14,6 +14,7 @@ from django.contrib.auth import login
 from django.shortcuts import render, render_to_response
 from SecureWitness.forms import UserForm
 from django.template import RequestContext
+import datetime
 
 #from SecureWitness.models import User
 
@@ -111,9 +112,15 @@ def detail(request, report_id):
     return render(request, 'SecureWitness/detail.html', {'report':report})
 
 def create(request):
-    return render(request, 'SecureWitness/create.html')
+    context = RequestContext(request)
+    current_user = request.user
+    report_form = ReportForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+    return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
-def create_report(request):
-    report = Report(author = request.user, short = request.GET['content'])
-    report.save()
+def success(request):
+    context = RequestContext(request)
+    report_form = ReportForm(data = request.POST)
+    if report_form.is_valid():
+        report = report_form.save()
+
     return HttpResponse('success')

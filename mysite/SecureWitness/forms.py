@@ -35,3 +35,9 @@ class ReportForm(forms.ModelForm):
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
+
+class EditForm(forms.ModelForm):
+	class Meta:
+		model = Report
+		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location')
+		widgets = {'author':forms.HiddenInput()}

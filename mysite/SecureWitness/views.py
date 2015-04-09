@@ -14,6 +14,15 @@ from django.shortcuts import render, render_to_response
 from SecureWitness.forms import UserForm
 from django.template import RequestContext
 
+#import the encryption Python files
+from SecureWitness.hybridencryption import encrypt_file, decrypt_file
+#Needed modules to handle encryption
+from Crypto.PublicKey import RSA
+from django.core.files import File
+
+
+
+
 #from SecureWitness.models import User
 
 
@@ -80,11 +89,37 @@ def register(request):
 
 def list(request):
 	# Handle file upload
+
 	if request.method == 'POST':
+		#Form that gets the contents of the user's upload
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
-			newdoc = Document(docfile = request.FILES['docfile'])
+	
+			#This is an UploadedFile object
+			docfile = request.FILES['docfile']
+
+			#Insteance of the model Document
+			newdoc = Document(docfile.name)
+
+			#Initial save
 			newdoc.save()
+	
+			#The user side generates a key to sign the file with
+			key = RSA.generate(2048)
+
+			#Get the current filepath
+			filepath = docfile.name
+
+			#Get the signature file and the encrypted file from the encryption method
+			sign_file, enc_name = encrypt_file('aaaaaaaaaaaaaaaa', key, filepath, 'encrypted.txt')
+
+			#Create a File object from the encrypted file name
+			with open(enc_name) as f:
+				enc_File = File(f)
+			
+			#Resave the file and push to the database
+			#newdoc = Document()
+			newdoc.save(enc_name, enc_File)
 
 			# Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))

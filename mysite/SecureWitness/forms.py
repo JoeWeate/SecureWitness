@@ -10,9 +10,6 @@ class UserForm(forms.ModelForm):
 		fields = ('username', 'email', 'password', 'first_name', 'last_name')
 
 class GroupForm(forms.ModelForm):
-	def __init__(self, *args, **kwargs):
-		super(GroupForm, self).__init__(*args, **kwargs)
-		self.fields['report'] = forms.ChoiceField(choices = [ (r.id, r.short) for r in Report.objects.all()])
 	class Meta:
 		model = Group
 		fields = {'name'}

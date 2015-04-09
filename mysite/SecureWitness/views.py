@@ -112,11 +112,8 @@ def groupSuccess(request):
     context = RequestContext(request)
     current_user = request.user
     group_form = GroupForm(data=request.POST)
-    report_id = request.POST['report']
-    report = Report.objects.get(pk=report_id)
     if group_form.is_valid():
         group = group_form.save()
-        report.groups.add(group)
         current_user.groups.add(group)
     return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
 

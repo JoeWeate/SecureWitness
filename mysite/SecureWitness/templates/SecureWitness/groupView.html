@@ -1,0 +1,23 @@
+Name: {{ group.name }}
+<br>
+Group Members:
+<ul>
+	{% for member in group_members %}
+		<li>{{ member.username }}</li>
+	{% endfor %}
+</ul>
+<br>
+Associated Reports:
+<ul>
+	{% for report in reports%}
+		<li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
+	{% endfor %}
+</ul>
+<br>
+<form id="add_user_form" method="post" action="/SecureWitness/groupView/{{ group.id }}/"
+			enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ add_user_form.as_p }}
+
+		<input type="submit" name="submit" value="Add User" />
+</form>

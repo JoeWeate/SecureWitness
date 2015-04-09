@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, EditForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -22,7 +22,7 @@ def index(request):
     else:
         current_user = request.user
         report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
-    return render(request,'SecureWitness/index.html',{'report_list': report_list,'name': name})
+    return render(request,'SecureWitness/index.html',{'report_list': report_list,'current_user': current_user})
 
 
 def register(request):

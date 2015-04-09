@@ -5,14 +5,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm, ReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import login
 
 from django.shortcuts import render, render_to_response
-from SecureWitness.forms import UserForm
 from django.template import RequestContext
 import datetime
 
@@ -103,6 +102,12 @@ def list(request):
 		{'documents': documents, 'form': form},
 		context_instance=RequestContext(request)
 	)
+
+def groupCreate(request):
+    context = RequestContext(request)
+    current_user = request.user
+    group_form = GroupForm()
+    return render_to_response('groupCreate.html', {'group_form': group_form}, context)
 
 def detail(request, report_id):
     try:

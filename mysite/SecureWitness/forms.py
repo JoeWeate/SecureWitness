@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from SecureWitness.models import Report
 from django import forms
 
@@ -8,6 +8,10 @@ class UserForm(forms.ModelForm):
 	class Meta:
 		model = User
 		fields = ('username', 'email', 'password', 'first_name', 'last_name')
+
+class GroupForm(forms.ModelForm):
+	class Meta:
+		model = Group
 
 class DocumentForm(forms.Form):
 	docfile = forms.FileField(

@@ -15,4 +15,6 @@ urlpatterns = patterns('',
     url(r'^delete/(?P<report_id>\d+)/$', views.delete, name='delete'),
     url(r'^groupCreate/$', views.groupCreate, name='groupCreate'),
     url(r'^groupSuccess/$', views.groupSuccess, name='groupSuccess'),
+    url(r'^groupList/$', views.groupList, name='groupList'),
+    url(r'^groupView/(?P<group_id>\d+)/$', views.groupView, name='groupView'),
 )

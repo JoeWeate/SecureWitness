@@ -5,7 +5,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, EditForm
+
+from django.contrib.auth.models import User, Group, Permission
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -108,6 +110,29 @@ def groupCreate(request):
     current_user = request.user
     group_form = GroupForm()
     return render_to_response('SecureWitness/groupcreate.html', {'group_form': group_form, 'current_user': current_user}, context)
+
+# View for displaying all groups current user is in
+def groupList(request):
+    context = RequestContext(request)
+    current_user = request.user
+    group_list = current_user.groups.all()
+    return render_to_response('SecureWitness/groupList.html', {'group_list': group_list, 'current_user': current_user}, context)
+
+# View for displaying details of groups including reports associated with group, members of group
+def groupView(request, group_id):
+    context = RequestContext(request)
+    current_user = request.user
+    try:
+        group = Group.objects.get(pk=group_id)
+        group_members = group.user_set.all()
+        reports = Report.objects.filter(groups=group)
+    except Report.DoesNotExist:
+        raise Http404("Report does not exist")
+    if request.method == 'POST':
+        user = User.objects.get(pk=request.POST['users'])
+        group.user_set.add(user)
+    add_user_form = AddUserForm()
+    return render_to_response('SecureWitness/groupView.html', {'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
 
 def groupSuccess(request):
     context = RequestContext(request)

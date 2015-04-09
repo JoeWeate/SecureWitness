@@ -9,6 +9,11 @@ class UserForm(forms.ModelForm):
 		model = User
 		fields = ('username', 'email', 'password', 'first_name', 'last_name')
 
+class AddUserForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		super(AddUserForm, self).__init__(*args, **kwargs)
+		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in User.objects.all()])
+
 class GroupForm(forms.ModelForm):
 	class Meta:
 		model = Group

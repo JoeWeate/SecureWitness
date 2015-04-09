@@ -2,3 +2,4 @@
 *.pyo
 *.swp
 *.swo
+db.sqlite3

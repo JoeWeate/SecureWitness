@@ -1,0 +1,18 @@
+{% load securewitness_extras %}
+
+Create a group
+
+{% if current_user|has_group:"admins" %}
+
+<br>
+<form id="group_form" method="post" action="/SecureWitness/groupSuccess/"
+			enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ group_form.as_p }}
+
+		<input type="submit" name="submit" value="Create Group" />
+</form>
+
+{% else %}
+	<p>You need to be an admin to create a group<p>
+{% endif %}

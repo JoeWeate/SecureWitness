@@ -5,27 +5,25 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm, ReportForm, EditForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import login
 
 from django.shortcuts import render, render_to_response
-from SecureWitness.forms import UserForm
 from django.template import RequestContext
 import datetime
-
-#from SecureWitness.models import User
 
 
 def index(request):
     if not request.user.is_authenticated():
         return redirect('/accounts/login/')
     else:
-        name = request.user.username
+        current_user = request.user
         report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
     return render(request,'SecureWitness/index.html',{'report_list': report_list,'name': name})
+
 
 def register(request):
 	# Like before, get the request's context.
@@ -103,6 +101,23 @@ def list(request):
 		{'documents': documents, 'form': form},
 		context_instance=RequestContext(request)
 	)
+
+# View for creating a group, no permissions, current user added to group
+def groupCreate(request):
+    context = RequestContext(request)
+    current_user = request.user
+    group_form = GroupForm()
+    return render_to_response('SecureWitness/groupCreate.html', {'group_form': group_form, 'current_user': current_user}, context)
+
+def groupSuccess(request):
+    context = RequestContext(request)
+    current_user = request.user
+    group_form = GroupForm(data=request.POST)
+    if group_form.is_valid():
+        group = group_form.save()
+        current_user.groups.add(group)
+    return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
+
 
 def detail(request, report_id):
     try:

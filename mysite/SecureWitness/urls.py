@@ -13,4 +13,6 @@ urlpatterns = patterns('',
     url(r'^success/$', views.success, name='success'),
     url(r'^list/$', views.list, name='list'),
     url(r'^delete/(?P<report_id>\d+)/$', views.delete, name='delete'),
+    url(r'^groupCreate/$', views.groupCreate, name='groupCreate'),
+    url(r'^groupSuccess/$', views.groupSuccess, name='groupSuccess'),
 )

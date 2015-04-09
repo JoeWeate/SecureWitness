@@ -1,11 +1,11 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SecureWitness.models import Report, Document
-from SecureWitness.forms import DocumentForm, ReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, EditForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -25,7 +25,7 @@ def index(request):
     else:
         name = request.user.username
         report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
-    return render(request,'SecureWitness/index.html',{'report_list': report_list,'name':name})
+    return render(request,'SecureWitness/index.html',{'report_list': report_list,'name': name})
 
 def register(request):
 	# Like before, get the request's context.
@@ -108,8 +108,16 @@ def detail(request, report_id):
     try:
         report = Report.objects.get(pk=report_id)
     except Report.DoesNotExist:
-        raise Http404("Question does not exist")
-    return render(request, 'SecureWitness/detail.html', {'report':report})
+        raise Http404("Report does not exist")
+    context = RequestContext(request)
+    if request.POST:
+        edit_form = EditForm(request.POST, instance=report)
+        if edit_form.is_valid():
+            edit_form.save()
+            return redirect('/SecureWitness/success')
+    else:
+        edit_form = EditForm(instance=report)
+    return render_to_response('SecureWitness/detail.html', {'edit_form':edit_form, 'report':report}, context)
 
 def create(request):
     context = RequestContext(request)
@@ -117,10 +125,20 @@ def create(request):
     report_form = ReportForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
     return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
-def success(request):
+def createSuccess(request):
     context = RequestContext(request)
     report_form = ReportForm(data = request.POST)
     if report_form.is_valid():
         report = report_form.save()
+    return render(request, 'SecureWitness/success.html')
 
-    return HttpResponse('success')
+def success(request):
+    return render(request, 'SecureWitness/success.html')
+
+def delete(request,report_id):
+    try:
+        report = Report.objects.get(pk=report_id)
+        report.delete()
+    except Report.DoesNotExist:
+        raise Http404("Report does not exist")
+    return render(request, 'SecureWitness/success.html')

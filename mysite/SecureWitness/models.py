@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import datetime
 
 # Create your models here.
@@ -29,7 +29,9 @@ class Report(models.Model):
 	location = models.CharField(max_length=200,blank=True)
 	# Optional keywords associated with report
 	keyword = models.ManyToManyField(Keyword,null=True,blank=True)
-
+	# Optional group associated with report,
+	# allowing them to search and access otherwise private reports
+	groups = models.ManyToManyField(Group, null=True, blank=True)
 	class Meta:
 		permissions = (
 			("can_read", "Permission to read file"),

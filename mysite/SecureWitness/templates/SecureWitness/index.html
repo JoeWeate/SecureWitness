@@ -22,6 +22,7 @@ Welcome {{current_user.username}}!
 {% if current_user|has_group:"admins" %}
 <a href="groupCreate">Create a Group</a>
 <br>
+<a href="addAdmin">Make another user an admin</a>
 {% endif %}
 <a href="create">Create Report</a>
 <br>

@@ -1,3 +1,7 @@
+{% load securewitness_extras %}
+
+{% if current_user|has_group:group.name %}
+
 Name: {{ group.name }}
 <br>
 Group Members:
@@ -21,3 +25,7 @@ Associated Reports:
 
 		<input type="submit" name="submit" value="Add User" />
 </form>
+{% else %}
+<p>You don't have access to this group!</p>
+
+{% endif %}

@@ -130,8 +130,9 @@ def groupView(request, group_id):
         user = User.objects.get(pk=request.POST['users'])
         group.user_set.add(user)
     add_user_form = AddUserForm()
-    return render_to_response('SecureWitness/groupView.html', {'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
+    return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
 
+# View displayed after succesfully creating a new group
 def groupSuccess(request):
     context = RequestContext(request)
     current_user = request.user
@@ -139,8 +140,9 @@ def groupSuccess(request):
     if group_form.is_valid():
         group = group_form.save()
         current_user.groups.add(group)
+    else:
+        print(group_form.errors)
     return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
-
 
 def detail(request, report_id):
     try:

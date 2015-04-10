@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     url(r'^groupSuccess/$', views.groupSuccess, name='groupSuccess'),
     url(r'^groupList/$', views.groupList, name='groupList'),
     url(r'^groupView/(?P<group_id>\d+)/$', views.groupView, name='groupView'),
-    url(r'^addAdmin/$', views.addAdmin, name='addAdmin'),
+    #url(r'^addAdmin/$', views.addAdmin, name='addAdmin'),
     url(r'^createFolder/$', views.createFolder, name='createFolder'),
     url(r'^folderSuccess/$', views.folderSuccess, name='folderSuccess'),
 )

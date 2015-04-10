@@ -7,6 +7,7 @@ class Document(models.Model):
 	docfile = models.FileField(upload_to='documents/%Y/%m/%d')
 	encrypted = models.BooleanField(default=False)
 
+
 class Keyword(models.Model):
 	word = models.CharField(max_length=200)
 
@@ -32,15 +33,22 @@ class Report(models.Model):
 	# Optional group associated with report,
 	# allowing them to search and access otherwise private reports
 	groups = models.ManyToManyField(Group, null=True, blank=True)
+
+	def __str__(self):
+		return self.short
+
 	class Meta:
 		permissions = (
 			("can_read", "Permission to read file"),
 			("can_search", "Permission to search for file"),
 		)
+	
+	
 
 class Folder(models.Model):
 	reports = models.ManyToManyField(Report,null=True,blank=True)
 	name = models.CharField(max_length=200)
-	owner = models.OneToOneField(User)
+	owner = models.ForeignKey(User)
 	pub_date = models.DateTimeField(default=datetime.datetime.today)
-
+	def __str__(self):
+		return self.name

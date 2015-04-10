@@ -1,0 +1,26 @@
+{{folder.name}}
+<br>
+
+{% if report_list %}
+    <ul>
+    {% for report in report_list %}
+        <li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
+    {% endfor %}
+
+    </ul>
+{% else %}
+    <p>No reports are available.</p>
+{% endif %}
+
+<form id="folder_form" method="post" enctype="multipart/form-data" >
+		{% csrf_token%}
+		{{ folder_form.as_p }}
+
+		<input type="submit" name="submit" value="Edit Folder" />
+</form>
+
+<form action='/SecureWitness/folderDelete/{{folder_id}}'>
+    <input type="submit" value="Delete Folder" onclick="return confirm('Are you sure to delete this folder?')">
+</form>
+<br>
+<a href="/SecureWitness/">Home</a>

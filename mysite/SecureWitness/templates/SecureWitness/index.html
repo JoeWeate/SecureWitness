@@ -1,7 +1,9 @@
 {% load securewitness_extras %}
 
 Welcome {{current_user.username}}!
-
+<br>
+Reports:
+<br>
 {% if report_list %}
     <ul>
     {% for report in report_list %}
@@ -12,17 +14,33 @@ Welcome {{current_user.username}}!
 {% else %}
     <p>No reports are available.</p>
 {% endif %}
+<br>
+Folders:
+<br>
+{% if folder_list %}
+    <ul>
+    {% for folder in folder_list %}
+        <li><a href="/SecureWitness/folder/{{ folder.id }}/">{{ folder.name }}</a></li>
+    {% endfor %}
+
+    </ul>
+{% else %}
+    <p>No folders are available.</p>
+{% endif %}
 
 
 <!-- {% for folder in folder_list %}
     	<li>{{folder.name}}</li>
 {% endfor %} -->
+
+<a href="create">Create Report</a>
+<br>
+<a href="createFolder">Create Folder</a>
+<br>
 <a href="groupList">My groups</a>
 <br>
 {% if current_user|has_group:"admins" %}
 <a href="groupCreate">Create a Group</a>
 <br>
 {% endif %}
-<a href="create">Create Report</a>
-<br>
 <a href="logout">Logout</a>

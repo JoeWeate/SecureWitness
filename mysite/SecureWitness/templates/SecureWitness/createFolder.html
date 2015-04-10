@@ -1,0 +1,11 @@
+Create a Folder
+
+<form id="folder_form" method="post" action="/SecureWitness/folderSuccess/"
+			enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ folder_form.as_p }}
+
+		<input type="submit" name="submit" value="Create Folder" />
+</form>
+<br>
+<a href="/SecureWitness/">Home</a>

@@ -1,9 +1,11 @@
 Create a report
 
-<form id="report_form" method="post" action="/SecureWitness/success/"
+<form id="report_form" method="post" action="/SecureWitness/createSuccess/"
 			enctype="multipart/form-data">
 		{% csrf_token%}
 		{{ report_form.as_p }}
 
 		<input type="submit" name="submit" value="Create Report" />
 </form>
+<br>
+<a href="/SecureWitness/">Home</a>

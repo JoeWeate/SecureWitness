@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report
+from SecureWitness.models import Report,Folder
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -8,6 +8,11 @@ class UserForm(forms.ModelForm):
 	class Meta:
 		model = User
 		fields = ('username', 'email', 'password', 'first_name', 'last_name')
+
+class AddUserForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		super(AddUserForm, self).__init__(*args, **kwargs)
+		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in User.objects.all()])
 
 class GroupForm(forms.ModelForm):
 	class Meta:
@@ -30,3 +35,15 @@ class ReportForm(forms.ModelForm):
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
+
+class EditForm(forms.ModelForm):
+	class Meta:
+		model = Report
+		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location')
+		widgets = {'author':forms.HiddenInput()}
+
+class FolderForm(forms.ModelForm):
+	class Meta:
+		model = Folder
+		fields = ('name', 'reports', 'owner')
+		widgets = {'owner':forms.HiddenInput()}

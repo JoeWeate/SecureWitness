@@ -1,0 +1,13 @@
+{% if group_list %}
+	<p>My groups:</p>
+	<ul>
+	{% for group in group_list %}
+		<li><a href="/SecureWitness/groupView/{{ group.id }}/">{{ group.name }}</a></li>
+	{% endfor %}
+
+	</ul>
+{% else %}
+	<p>You aren't a member of any groups yet.</p>
+{% endif %}
+<br>
+<a href="/SecureWitness/">Home</a>

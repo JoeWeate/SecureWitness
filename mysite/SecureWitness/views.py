@@ -140,8 +140,9 @@ def list(request):
 			inputFile.close()
 
 
-	
+			#Generate name for a signature file	
 			signFileName = request.FILES['docfile'].name + '.pem'
+			#Write the signature file with the private key
 			with open(signFileName, 'wb') as signer:
 				privKey = RSAkey
 				pubKey = privKey.publickey()
@@ -150,20 +151,13 @@ def list(request):
 				signature = cipher.sign(msg)
 				signer.write(signature)
 
-				#signedFile = File(signer)
+			#Reopen the signature file as a readable in order to push it to the database 
+			#####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
 			with open(signFileName, 'rb') as signer:
 				signedFile = File(signer)
 				signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
 				signatureFile.save()
 				
-			#outfile.save()
-	#		newdoc.save()
-#			fieldfile.truncate()
-#			fieldfile.close()
-#			outthing.close()
-#			outfile.close()
-	#		
-	#		#newdoc.save()
 	#		# Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))
 	else:

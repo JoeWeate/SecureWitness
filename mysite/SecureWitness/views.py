@@ -18,6 +18,18 @@ from django.template import RequestContext
 import datetime
 
 
+from SecureWitness.hybridencryption import encrypt_file
+from Crypto.PublicKey import RSA
+import os, random, struct
+from Crypto.Hash import SHA256
+from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Signature import PKCS1_v1_5
+from Crypto import Random
+from django.db import models
+from django.core.files import File
+
+
 def index(request):
     if not request.user.is_authenticated():
         return redirect('/accounts/login/')
@@ -87,10 +99,109 @@ def list(request):
 	if request.method == 'POST':
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
-			newdoc = Document(docfile = request.FILES['docfile'])
-			newdoc.save()
+			
+			#Encrypted File Writer Instantiation
+			outputfilename = 'SecureWitness/encrypted.txt'
+			outwriter  = open(outputfilename, 'wb')
 
-			# Redirect to the document list after POST
+			#Plain Text Reader Instantiation
+			inputFile  = request.FILES['docfile']
+			inputFile.open('rb')
+			inputLines = inputFile.readlines()
+			
+			#Crypto characteristic generation
+			key        = 'aaaaaaaaaaaaaaaa'
+			RSAkey     = RSA.generate(2048)
+			iv         = 'bbbbbbbbbbbbbbbb'
+			encryptor  = AES.new(key, AES.MODE_CBC, iv)
+			filesize   = inputFile.size
+			
+			#Write basics
+			outwriter.write((struct.pack('<Q', filesize)))
+			outwriter.write(bytes(iv, 'utf-8'))
+			
+			#Write the encrypted file
+			for line in inputLines:
+				if len(line) == 0:
+					break
+				elif len(line)%16 != 0:
+					line += (' ' * (16 - len(line)%16)).encode('utf-8')
+				outwriter.write(encryptor.encrypt(line))	
+			#Cannot save unless the file is open in read mode
+			outwriter.close()
+			outwriter = open(outputfilename, 'rb')
+			outputFile = File(outwriter)
+			newdoc = Document(docfile = outputFile, encrypted = True)
+			
+			newdoc.save()
+			outwriter.close()
+			inputFile.close()
+
+
+
+
+
+	#		outfilename = 'encrypted.txt'#request.FILES['docfile'].name + '.enc'
+	#		outthing = open('SecureWitness/'+outfilename, 'wb')			
+	#		outfile = File(outthing)
+
+	#		newdoc = Document(docfile = request.FILES['docfile'], encfile = outfile, encrypted = True)
+
+	#		#newdoc.save()
+	#		#outdoc = Document()	
+	#		#outfile = django.core.files.File()
+	#		
+	#		outfile   = newdoc.encfile
+	#		fieldfile = newdoc.docfile
+
+	#		#outputdoc.truncate()
+
+	#		RSAkey = RSA.generate(2048)
+	#		#outfile, keyfile = encrypt_file('aaaaaaaaaaaaaaaa', RSAkey, tempfile, newdoc.name + '.enc')
+	#		iv = 'ffffffffffffffff'
+	#		key = 'aaaaaaaaaaaaaaaa'
+	#		encryptor = AES.new(key, AES.MODE_CBC, iv)
+	#		filesize = newdoc.docfile.size
+
+	#		#with File.open(newdoc.docfile, 'rb') as inp:
+	#		
+	#		fieldfile.open('rb')
+	#		inp = fieldfile.readlines()	
+	#		
+	#		outfile.open('wb')
+	#		#newdoc.save()
+	#		#outfile.docfile.open(mode = 'wb')
+	#		
+	#		#with open(outfilename, 'wb') as outfile:
+	#		outfile.write((struct.pack('<Q', filesize)))
+	#		outfile.write(bytes(iv, 'utf-8'))
+	#		for chunk in inp:
+	#			if len(chunk) == 0:
+	#				break
+	#			elif len(chunk)%16 != 0:
+	#				chunk += (' ' * (16 - len(chunk)%16)).encode('utf-8')
+	#			outfile.write(encryptor.encrypt(chunk))
+	#		#outdoc = File(outfile)
+	#		#newdoc = Document(docfile = outputdoc)			
+
+	#
+	#		with open(request.FILES['docfile'].name + '.pem', 'wb') as signer:
+	#			privKey = RSAkey
+	#			pubKey = privKey.publickey()
+	#			cipher = PKCS1_v1_5.new(privKey)
+	#			msg = SHA256.new(key.encode('utf-8'))
+	#			signature = cipher.sign(msg)
+	#			signer.write(signature)
+
+	#		#outfile.save()
+	#		newdoc.save()
+	#		fieldfile.truncate()
+	#		fieldfile.close()
+	#		outthing.close()
+	#		outfile.close()
+	#		
+	#		#newdoc.save()
+	#		# Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))
 	else:
 		form = DocumentForm() # A empty, unbound form

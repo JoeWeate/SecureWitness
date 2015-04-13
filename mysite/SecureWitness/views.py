@@ -99,16 +99,17 @@ def list(request):
 	if request.method == 'POST':
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
-			
-			#Encrypted File Writer Instantiation
-			outputfilename = 'SecureWitness/encrypted.txt'
-			outwriter  = open(outputfilename, 'wb')
 
 			#Plain Text Reader Instantiation
 			inputFile  = request.FILES['docfile']
 			inputFile.open('rb')
 			inputLines = inputFile.readlines()
-			
+	
+			#Encrypted File Writer Instantiation
+			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
+			outwriter  = open(outputfilename, 'wb')
+
+		
 			#Crypto characteristic generation
 			key        = 'aaaaaaaaaaaaaaaa'
 			RSAkey     = RSA.generate(2048)
@@ -131,74 +132,36 @@ def list(request):
 			outwriter.close()
 			outwriter = open(outputfilename, 'rb')
 			outputFile = File(outwriter)
-			newdoc = Document(docfile = outputFile, encrypted = True)
-			
+			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
+		
+			#Save the object to the database and close the open files	
 			newdoc.save()
 			outwriter.close()
 			inputFile.close()
 
 
+	
+			signFileName = request.FILES['docfile'].name + '.pem'
+			with open(signFileName, 'wb') as signer:
+				privKey = RSAkey
+				pubKey = privKey.publickey()
+				cipher = PKCS1_v1_5.new(privKey)
+				msg = SHA256.new(key.encode('utf-8'))
+				signature = cipher.sign(msg)
+				signer.write(signature)
 
-
-
-	#		outfilename = 'encrypted.txt'#request.FILES['docfile'].name + '.enc'
-	#		outthing = open('SecureWitness/'+outfilename, 'wb')			
-	#		outfile = File(outthing)
-
-	#		newdoc = Document(docfile = request.FILES['docfile'], encfile = outfile, encrypted = True)
-
-	#		#newdoc.save()
-	#		#outdoc = Document()	
-	#		#outfile = django.core.files.File()
-	#		
-	#		outfile   = newdoc.encfile
-	#		fieldfile = newdoc.docfile
-
-	#		#outputdoc.truncate()
-
-	#		RSAkey = RSA.generate(2048)
-	#		#outfile, keyfile = encrypt_file('aaaaaaaaaaaaaaaa', RSAkey, tempfile, newdoc.name + '.enc')
-	#		iv = 'ffffffffffffffff'
-	#		key = 'aaaaaaaaaaaaaaaa'
-	#		encryptor = AES.new(key, AES.MODE_CBC, iv)
-	#		filesize = newdoc.docfile.size
-
-	#		#with File.open(newdoc.docfile, 'rb') as inp:
-	#		
-	#		fieldfile.open('rb')
-	#		inp = fieldfile.readlines()	
-	#		
-	#		outfile.open('wb')
-	#		#newdoc.save()
-	#		#outfile.docfile.open(mode = 'wb')
-	#		
-	#		#with open(outfilename, 'wb') as outfile:
-	#		outfile.write((struct.pack('<Q', filesize)))
-	#		outfile.write(bytes(iv, 'utf-8'))
-	#		for chunk in inp:
-	#			if len(chunk) == 0:
-	#				break
-	#			elif len(chunk)%16 != 0:
-	#				chunk += (' ' * (16 - len(chunk)%16)).encode('utf-8')
-	#			outfile.write(encryptor.encrypt(chunk))
-	#		#outdoc = File(outfile)
-	#		#newdoc = Document(docfile = outputdoc)			
-
-	#
-	#		with open(request.FILES['docfile'].name + '.pem', 'wb') as signer:
-	#			privKey = RSAkey
-	#			pubKey = privKey.publickey()
-	#			cipher = PKCS1_v1_5.new(privKey)
-	#			msg = SHA256.new(key.encode('utf-8'))
-	#			signature = cipher.sign(msg)
-	#			signer.write(signature)
-
-	#		#outfile.save()
+				#signedFile = File(signer)
+			with open(signFileName, 'rb') as signer:
+				signedFile = File(signer)
+				signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
+				signatureFile.save()
+				
+			#outfile.save()
 	#		newdoc.save()
-	#		fieldfile.truncate()
-	#		fieldfile.close()
-	#		outthing.close()
-	#		outfile.close()
+#			fieldfile.truncate()
+#			fieldfile.close()
+#			outthing.close()
+#			outfile.close()
 	#		
 	#		#newdoc.save()
 	#		# Redirect to the document list after POST

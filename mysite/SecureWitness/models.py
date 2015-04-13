@@ -7,6 +7,7 @@ class Document(models.Model):
 	docfile = models.FileField(upload_to='documents/%Y/%m/%d')
 	#encfile = models.FileField(blank=True, upload_to='documents/%Y/%m/%d')
 	encrypted = models.BooleanField(default=False)
+	sign = models.BooleanField(default=False)
 
 
 class Keyword(models.Model):

@@ -4,10 +4,14 @@ import datetime
 
 # Create your models here.
 class Document(models.Model):
+	name = models.CharField(max_length=200)
 	docfile = models.FileField(upload_to='documents/%Y/%m/%d')
 	#encfile = models.FileField(blank=True, upload_to='documents/%Y/%m/%d')
 	encrypted = models.BooleanField(default=False)
 	sign = models.BooleanField(default=False)
+
+	def __str__(self):
+		return self.name
 
 
 class Keyword(models.Model):

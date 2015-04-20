@@ -9,7 +9,7 @@
     {% if documents %}
         <ul>
         {% for document in documents %}
-            <li><a href="{{ document.docfile.url }}">{{ document.docfile.name }}</a></li>
+            <li><a href="{{ document.docfile.url }}">{{ document.name }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
@@ -25,6 +25,12 @@
                 {{ form.docfile.errors }}
                 {{ form.docfile }}
             </p>
+            <p>{{ form.name.label_tag }} {{form.name.help_text }}</p>
+            <p>
+                {{ form.name.errors }}
+                {{ form.name }}
+            </p>
+
             <p><input type="submit" value="Upload" /></p>
         </form>
     </body>

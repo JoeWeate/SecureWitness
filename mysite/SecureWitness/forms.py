@@ -34,8 +34,12 @@ class DocumentForm(forms.Form):
 		label='Select a file',
 		help_text='max. 42 megabytes'
 	)
+	name = forms.CharField(max_length=200)
 
 class ReportForm(forms.ModelForm):
+	def __init__(self, documents, *args, **kwargs):
+		super(ReportForm, self).__init__(*args, **kwargs)
+		self.fields['doc'] = forms.ChoiceField(choices = [ (d.id, d.name) for d in documents])
 	class Meta:
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')

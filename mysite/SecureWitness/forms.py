@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report,Folder
+from SecureWitness.models import Report,Folder,Document
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -35,6 +35,10 @@ class ReportForm(forms.ModelForm):
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
+		
+	def __init__(self, user, *args, **kwargs):
+		super (ReportForm, self).__init__(*args,**kwargs)
+		self.fields['doc'].queryset = Document.objects.filter(author=user)
 
 class EditForm(forms.ModelForm):
 	class Meta:
@@ -43,6 +47,9 @@ class EditForm(forms.ModelForm):
 		widgets = {'author':forms.HiddenInput()}
 
 class FolderForm(forms.ModelForm):
+	def __init__(self, user, *args, **kwargs):
+		super (FolderForm, self).__init__(*args,**kwargs)
+		self.fields['reports'].queryset = Report.objects.filter(author=user)
 	class Meta:
 		model = Folder
 		fields = ('name', 'reports', 'owner')

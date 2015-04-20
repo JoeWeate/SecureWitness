@@ -233,12 +233,13 @@ def detail(request, report_id):
 def create(request):
     context = RequestContext(request)
     current_user = request.user
-    report_form = ReportForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+    report_form = ReportForm(current_user,initial = {'author':current_user, 'inc_date':datetime.datetime.today})
     return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
 def createSuccess(request):
     context = RequestContext(request)
-    report_form = ReportForm(data = request.POST)
+    current_user = request.user
+    report_form = ReportForm(current_user, data = request.POST)
     if report_form.is_valid():
         report = report_form.save()
     return render(request, 'SecureWitness/success.html')
@@ -255,6 +256,8 @@ def delete(request,report_id):
     return render(request, 'SecureWitness/success.html')
 
 def folder(request,folder_id):
+    context = RequestContext(request)
+    current_user = request.user
     try:
         folder = Folder.objects.get(id=folder_id)
     except Report.DoesNotExist:
@@ -262,24 +265,25 @@ def folder(request,folder_id):
     report_list = folder.reports.all
     context = RequestContext(request)
     if request.POST:
-        folder_form = FolderForm(request.POST, instance=folder)
+        folder_form = FolderForm(current_user,request.POST, instance=folder)
         if folder_form.is_valid():
             folder_form.save()
             return redirect('/SecureWitness/success')
     else:
-        folder_form = FolderForm(instance=folder)
+        folder_form = FolderForm(current_user,instance=folder)
     return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
 
 def createFolder(request):
     context = RequestContext(request)
-    folder_form = FolderForm(initial = {'owner':request.user})
+    current_user = request.user
+    folder_form = FolderForm(current_user,initial = {'owner':request.user})
     return render_to_response('SecureWitness/createFolder.html', {'folder_form':folder_form},context)
 
 
 def folderSuccess(request):
     current_user = request.user
-    folder_form = FolderForm(data=request.POST)
+    folder_form = FolderForm(current_user,data=request.POST)
     #if folder_form.is_valid():
     folder = folder_form.save()
     return render(request, 'SecureWitness/folderSuccess.html')

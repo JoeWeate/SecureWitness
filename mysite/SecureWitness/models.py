@@ -9,6 +9,7 @@ class Document(models.Model):
 	#encfile = models.FileField(blank=True, upload_to='documents/%Y/%m/%d')
 	encrypted = models.BooleanField(default=False)
 	sign = models.BooleanField(default=False)
+	author = models.ForeignKey(User)
 
 	def __str__(self):
 		return self.name

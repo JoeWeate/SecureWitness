@@ -114,7 +114,7 @@ def list(request):
 		
 			#Crypto characteristic generation
 			key        = 'aaaaaaaaaaaaaaaa'
-			RSAkey     = RSA.generate(2048)
+#			RSAkey     = RSA.generate(2048)
 			iv         = 'bbbbbbbbbbbbbbbb'
 			encryptor  = AES.new(key, AES.MODE_CBC, iv)
 			filesize   = inputFile.size
@@ -122,14 +122,23 @@ def list(request):
 			#Write basics
 			outwriter.write((struct.pack('<Q', filesize)))
 			outwriter.write(bytes(iv, 'utf-8'))
+			outwriter.write(key.encode('utf-8'))
+			#outwriter.write(RSA.exportKey('PEM'))
 			
+			#Need to sign the file
+			#cipher = PKCS1_v1_5.new(RSAkey)			
+#			msg = SHA256.new(RSAkey)
+			#signature = cipher.sign(RSAkey)
+			#outwriter.write(signature.encode('utf-8'))
+		
 			#Write the encrypted file
 			for line in inputLines:
 				if len(line) == 0:
 					break
 				elif len(line)%16 != 0:
 					line += (' ' * (16 - len(line)%16)).encode('utf-8')
-				outwriter.write(encryptor.encrypt(line))	
+				outwriter.write(encryptor.encrypt(line))		
+
 			#Cannot save unless the file is open in read mode
 			outwriter.close()
 			outwriter = open(outputfilename, 'rb')
@@ -143,17 +152,23 @@ def list(request):
 			outwriter.close()
 			inputFile.close()
 
-
 			#Generate name for a signature file	
 			signFileName = request.FILES['docfile'].name + '.pem'
+			
 			#Write the signature file with the private key
 			with open(signFileName, 'wb') as signer:
-				privKey = RSAkey
-				pubKey = privKey.publickey()
-				cipher = PKCS1_v1_5.new(privKey)
-				msg = SHA256.new(key.encode('utf-8'))
-				signature = cipher.sign(msg)
-				signer.write(signature)
+				#privKey = RSAkey
+				#pubKey = privKey.publickey()
+				#cipher = PKCS1_v1_5.new(privKey)
+				#msg = SHA256.new(RSAkey)
+				#signature = signer.sign(msg)
+				signer.write(key.encode('utf-8'))
+	
+			#Save the object to the database and close the open files	
+			newdoc.save()
+			outwriter.close()
+		#	inputFile.close()
+
 
 			#Reopen the signature file as a readable in order to push it to the database 
 			#####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think

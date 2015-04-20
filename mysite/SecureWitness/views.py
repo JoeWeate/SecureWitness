@@ -29,7 +29,7 @@ from Crypto import Random
 from django.db import models
 from django.core.files import File
 
-
+@login_required
 def index(request):
     if not request.user.is_authenticated():
         return redirect('/accounts/login/')
@@ -94,6 +94,7 @@ def register(request):
     output="Author: "+p.author+"Published date: "+str(p.pub_date)+'\n'+"Content: "+p.content+'\n'
     return HttpResponse(output)
 
+@login_required
 def list(request):
 	# Handle file upload
 	if request.method == 'POST':
@@ -174,6 +175,7 @@ def list(request):
 	)
 
 # View for creating a group, no permissions, current user added to group
+@login_required
 def groupCreate(request):
     context = RequestContext(request)
     current_user = request.user
@@ -181,6 +183,7 @@ def groupCreate(request):
     return render_to_response('SecureWitness/groupcreate.html', {'group_form': group_form, 'current_user': current_user}, context)
 
 # View for displaying all groups current user is in
+@login_required
 def groupList(request):
     context = RequestContext(request)
     current_user = request.user
@@ -188,6 +191,7 @@ def groupList(request):
     return render_to_response('SecureWitness/groupList.html', {'group_list': group_list, 'current_user': current_user}, context)
 
 # View for displaying details of groups including reports associated with group, members of group
+@login_required
 def groupView(request, group_id):
     context = RequestContext(request)
     current_user = request.user
@@ -291,3 +295,31 @@ def folderDelete(request,folder_id):
     except Report.DoesNotExist:
         raise Http404("Report does not exist")
     return render(request, 'SecureWitness/success.html')
+
+def addAdmin(request):
+    context = RequestContext(request)
+    current_user = request.user
+    admins = Group.objects.get(name='admins')
+    members = admins.user_set.all()
+    if request.method == 'POST':
+        user = User.objects.get(pk=request.POST['users'])
+        admins.user_set.add(user)
+    add_user_form = AddUserForm()
+    return render_to_response('SecureWitness/addAdmin.html', {'current_user': current_user, 'add_user_form': add_user_form, 'admins': admins, 'members': members}, context)
+
+def suspendUser(request):
+    context = RequestContext(request)
+    current_user = request.user
+    suspended, created = Group.objects.get_or_create(name="suspended")
+    members = suspended.user_set.all()
+    if request.method == 'POST':
+        user = User.objects.get(pk=request.POST['users'])
+        user.is_active = False
+        user.save()
+        suspended.user_set.add(user)
+    add_user_form = AddUserForm()
+    return render_to_response('SecureWitness/suspendUser.html', {'current_user': current_user, 'add_user_form': add_user_form, 'members': members}, context)
+
+
+
+

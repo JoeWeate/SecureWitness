@@ -14,6 +14,11 @@ class AddUserForm(forms.Form):
 		super(AddUserForm, self).__init__(*args, **kwargs)
 		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in User.objects.all()])
 
+class ReactivateUserForm(forms.Form):
+	def __init__(self, members, *args, **kwargs):
+		super(ReactivateUserForm, self).__init__(*args, **kwargs)
+		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in members])
+
 class GroupForm(forms.ModelForm):
 	class Meta:
 		model = Group

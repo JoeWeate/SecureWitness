@@ -24,4 +24,5 @@ urlpatterns = patterns('',
     url(r'^folderSuccess/$', views.folderSuccess, name='folderSuccess'),
     url(r'^addAdmin/$', views.addAdmin, name='addAdmin'),
     url(r'^suspendUser/$', views.suspendUser, name='suspendUser'),
+    url(r'^reactivateUser/$', views.reactivateUser, name='reactivateUser'),
 )

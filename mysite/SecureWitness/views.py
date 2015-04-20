@@ -227,34 +227,36 @@ def groupSuccess(request):
 
 @login_required
 def detail(request, report_id):
+	current_user = request.user
 	try:
 		report = Report.objects.get(pk=report_id)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	if request.POST:
-		edit_form = EditForm(request.POST, instance=report)
+		edit_form = EditForm(current_user,request.POST, instance=report)
 		if edit_form.is_valid():
 			edit_form.save()
 			return redirect('/SecureWitness/success')
 	else:
-		edit_form = EditForm(instance=report)
+		edit_form = EditForm(current_user,instance=report)
 	return render_to_response('SecureWitness/detail.html', {'edit_form':edit_form, 'report':report}, context)
 
 @login_required
 def create(request):
 	context = RequestContext(request)
 	current_user = request.user
-	documents = Document.objects.filter(author=current_user)
-	report_form = ReportForm(documents, initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+	# documents = Document.objects.filter(author=current_user)
+	report_form = ReportForm(current_user, initial = {'author':current_user, 'inc_date':datetime.datetime.today})
 	return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
 @login_required
 def createSuccess(request):
 	context = RequestContext(request)
-	report_form = ReportForm(data = request.POST)
-	if report_form.is_valid():
-		report = report_form.save()
+	current_user = request.user
+	documents = Document.objects.filter(author=current_user)
+	report_form = ReportForm(documents, data = request.POST)
+	report = report_form.save()
 	return render(request, 'SecureWitness/success.html')
 
 @login_required
@@ -278,25 +280,27 @@ def folder(request,folder_id):
 		raise Http404("Report does not exist")
 	report_list = folder.reports.all
 	context = RequestContext(request)
+	current_user = request.user
 	if request.POST:
-		folder_form = FolderForm(request.POST, instance=folder)
+		folder_form = FolderForm(current_user,request.POST, instance=folder)
 		if folder_form.is_valid():
 			folder_form.save()
 			return redirect('/SecureWitness/success')
 	else:
-		folder_form = FolderForm(instance=folder)
+		folder_form = FolderForm(current_user,instance=folder)
 	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
 @login_required
 def createFolder(request):
+	current_user = request.user
 	context = RequestContext(request)
-	folder_form = FolderForm(initial = {'owner':request.user})
+	folder_form = FolderForm(current_user, initial = {'owner':request.user})
 	return render_to_response('SecureWitness/createFolder.html', {'folder_form':folder_form},context)
 
 @login_required
 def folderSuccess(request):
 	current_user = request.user
-	folder_form = FolderForm(data=request.POST)
+	folder_form = FolderForm(current_user,data=request.POST)
 	#if folder_form.is_valid():
 	folder = folder_form.save()
 	return render(request, 'SecureWitness/folderSuccess.html')

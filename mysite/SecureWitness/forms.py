@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report,Folder
+from SecureWitness.models import Report,Folder, Document
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -25,9 +25,9 @@ class GroupForm(forms.ModelForm):
 		fields = {'name'}
 
 # class PermissionForm(forms.Form):
-# 	def __init__(self, ride, *args, **kwargs):
-# 		super(PermissionForm, self).__init__(*args, **kwargs)
-# 		self.fields['rides'] = forms.ChoiceField(choices = [ (r.id, str(r)) for r in Ride.objects.filter(start = ride.start, dest = ride.start)])
+#   def __init__(self, ride, *args, **kwargs):
+#       super(PermissionForm, self).__init__(*args, **kwargs)
+#       self.fields['rides'] = forms.ChoiceField(choices = [ (r.id, str(r)) for r in Ride.objects.filter(start = ride.start, dest = ride.start)])
 
 class DocumentForm(forms.Form):
 	docfile = forms.FileField(
@@ -37,21 +37,27 @@ class DocumentForm(forms.Form):
 	name = forms.CharField(max_length=200)
 
 class ReportForm(forms.ModelForm):
-	def __init__(self, documents, *args, **kwargs):
+	def __init__(self, current_user, *args, **kwargs):
 		super(ReportForm, self).__init__(*args, **kwargs)
-		self.fields['doc'] = forms.ChoiceField(choices = [ (d.id, d.name) for d in documents])
+		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
 	class Meta:
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
 
 class EditForm(forms.ModelForm):
+	def __init__(self, current_user, *args, **kwargs):
+		super(EditForm, self).__init__(*args, **kwargs)
+		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
 	class Meta:
 		model = Report
 		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
 
 class FolderForm(forms.ModelForm):
+	def __init__(self, current_user, *args, **kwargs):
+		super(FolderForm, self).__init__(*args, **kwargs)
+		self.fields['reports'].queryset = Report.objects.filter(author = current_user)
 	class Meta:
 		model = Folder
 		fields = ('name', 'reports', 'owner')

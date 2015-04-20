@@ -14,6 +14,11 @@ class AddUserForm(forms.Form):
 		super(AddUserForm, self).__init__(*args, **kwargs)
 		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in User.objects.all()])
 
+class ReactivateUserForm(forms.Form):
+	def __init__(self, members, *args, **kwargs):
+		super(ReactivateUserForm, self).__init__(*args, **kwargs)
+		self.fields['users'] = forms.ChoiceField(choices = [ (u.id, str(u)) for u in members])
+
 class GroupForm(forms.ModelForm):
 	class Meta:
 		model = Group
@@ -29,8 +34,12 @@ class DocumentForm(forms.Form):
 		label='Select a file',
 		help_text='max. 42 megabytes'
 	)
+	name = forms.CharField(max_length=200)
 
 class ReportForm(forms.ModelForm):
+	def __init__(self, documents, *args, **kwargs):
+		super(ReportForm, self).__init__(*args, **kwargs)
+		self.fields['doc'] = forms.ChoiceField(choices = [ (d.id, d.name) for d in documents])
 	class Meta:
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')

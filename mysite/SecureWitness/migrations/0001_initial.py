@@ -17,9 +17,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Document',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('name', models.CharField(max_length=200)),
                 ('docfile', models.FileField(upload_to='documents/%Y/%m/%d')),
                 ('encrypted', models.BooleanField(default=False)),
+                ('sign', models.BooleanField(default=False)),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -28,10 +31,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Folder',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
                 ('pub_date', models.DateTimeField(default=datetime.datetime.today)),
-                ('owner', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
@@ -40,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Keyword',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('word', models.CharField(max_length=200)),
             ],
             options={
@@ -50,7 +53,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Report',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('pub_date', models.DateTimeField(default=datetime.datetime.today)),
                 ('inc_date', models.DateTimeField(null=True, blank=True)),
                 ('short', models.CharField(max_length=200)),

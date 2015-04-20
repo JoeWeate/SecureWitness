@@ -1,0 +1,27 @@
+{% load securewitness_extras %}
+
+{% if current_user|has_group:'admins' %}
+
+Current suspended users:
+<ul>
+	{% for member in members %}
+		<li>{{member.username }}</li>
+	{% endfor %}
+</ul>
+<br>
+
+Reactivate a user:
+<br>
+<form id="reactivate_user_form" method="post" action="/SecureWitness/reactivateUser/" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ reactivate_user_form.as_p }}
+
+	<input type="submit" name="submit" value="Reactivate User" />
+</form>
+{% else %}
+<p>You don't have access to this function. Must have admin privileges.</p>
+
+{% endif %}
+
+<br>
+<a href="/SecureWitness/">Home</a>

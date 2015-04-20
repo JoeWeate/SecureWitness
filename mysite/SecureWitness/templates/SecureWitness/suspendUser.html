@@ -1,0 +1,26 @@
+{% load securewitness_extras %}
+
+{% if current_user|has_group:'admins' %}
+
+Current suspended users:
+<ul>
+	{% for member in members %}
+		<li>{{member.username }}</li>
+	{% endfor %}
+</ul>
+<br>
+Suspend a user:
+<br>
+<form id="add_user_form" method="post" action="/SecureWitness/suspendUser/" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ add_user_form.as_p }}
+
+	<input type="submit" name="submit" value="Suspend User" />
+</form>
+{% else %}
+<p>You don't have access to this function. Must have admin privileges.</p>
+
+{% endif %}
+
+<br>
+<a href="/SecureWitness/">Home</a>

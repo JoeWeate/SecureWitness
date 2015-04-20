@@ -2,7 +2,8 @@
 
 Welcome {{current_user.username}}!
 <br>
-Reports:
+<br>
+My Reports:
 <br>
 {% if report_list %}
     <ul>
@@ -15,7 +16,7 @@ Reports:
     <p>No reports are available.</p>
 {% endif %}
 <br>
-Folders:
+My Folders:
 <br>
 {% if folder_list %}
     <ul>
@@ -39,9 +40,18 @@ Folders:
 <br>
 <a href="groupList">My groups</a>
 <br>
+<br>
 {% if current_user|has_group:"admins" %}
+Admin functions:
+<br>
 <a href="groupCreate">Create a Group</a>
 <br>
 <a href="addAdmin">Make another user an admin</a>
+<br>
+<a href="suspendUser">Suspend a user</a>
+<br>
+<a href="reactivateUser">Reactivate a user</a>
+<br>
+<br>
 {% endif %}
 <a href="logout">Logout</a>

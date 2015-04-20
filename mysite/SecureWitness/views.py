@@ -208,6 +208,7 @@ def groupView(request, group_id):
     return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
 
 # View displayed after succesfully creating a new group
+@login_required
 def groupSuccess(request):
     context = RequestContext(request)
     current_user = request.user
@@ -219,6 +220,7 @@ def groupSuccess(request):
         print(group_form.errors)
     return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
 
+@login_required
 def detail(request, report_id):
     try:
         report = Report.objects.get(pk=report_id)
@@ -234,12 +236,14 @@ def detail(request, report_id):
         edit_form = EditForm(instance=report)
     return render_to_response('SecureWitness/detail.html', {'edit_form':edit_form, 'report':report}, context)
 
+@login_required
 def create(request):
     context = RequestContext(request)
     current_user = request.user
     report_form = ReportForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
     return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
+@login_required
 def createSuccess(request):
     context = RequestContext(request)
     report_form = ReportForm(data = request.POST)
@@ -247,9 +251,11 @@ def createSuccess(request):
         report = report_form.save()
     return render(request, 'SecureWitness/success.html')
 
+@login_required
 def success(request):
     return render(request, 'SecureWitness/success.html')
 
+@login_required
 def delete(request,report_id):
     try:
         report = Report.objects.get(pk=report_id)
@@ -258,6 +264,7 @@ def delete(request,report_id):
         raise Http404("Report does not exist")
     return render(request, 'SecureWitness/success.html')
 
+@login_required
 def folder(request,folder_id):
     try:
         folder = Folder.objects.get(id=folder_id)
@@ -274,13 +281,13 @@ def folder(request,folder_id):
         folder_form = FolderForm(instance=folder)
     return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
-
+@login_required
 def createFolder(request):
     context = RequestContext(request)
     folder_form = FolderForm(initial = {'owner':request.user})
     return render_to_response('SecureWitness/createFolder.html', {'folder_form':folder_form},context)
 
-
+@login_required
 def folderSuccess(request):
     current_user = request.user
     folder_form = FolderForm(data=request.POST)
@@ -288,6 +295,7 @@ def folderSuccess(request):
     folder = folder_form.save()
     return render(request, 'SecureWitness/folderSuccess.html')
 
+@login_required
 def folderDelete(request,folder_id):
     try:
         folder = Folder.objects.get(pk=folder_id)
@@ -296,6 +304,7 @@ def folderDelete(request,folder_id):
         raise Http404("Report does not exist")
     return render(request, 'SecureWitness/success.html')
 
+@login_required
 def addAdmin(request):
     context = RequestContext(request)
     current_user = request.user
@@ -307,6 +316,7 @@ def addAdmin(request):
     add_user_form = AddUserForm()
     return render_to_response('SecureWitness/addAdmin.html', {'current_user': current_user, 'add_user_form': add_user_form, 'admins': admins, 'members': members}, context)
 
+@login_required
 def suspendUser(request):
     context = RequestContext(request)
     current_user = request.user
@@ -320,6 +330,7 @@ def suspendUser(request):
     add_user_form = AddUserForm()
     return render_to_response('SecureWitness/suspendUser.html', {'current_user': current_user, 'add_user_form': add_user_form, 'members': members}, context)
 
+@login_required
 def reactivateUser(request):
     context = RequestContext(request)
     current_user = request.user

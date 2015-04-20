@@ -45,25 +45,31 @@ def encrypt_file(key, RSAkey, infile, outfile=None, chunksize=64*1024):
 		signer.write(signature)
 	
 	return outfile, 'signature.pem'
-def decrypt_file(key, RSAkey, infile, outfile=None, chunksize = 24*1024):
+def decrypt_file(sigfile, infile, outfile=None, chunksize = 24*1024):
 	#print(chunksize)
 	if not outfile:
 		outfile = os.path.splitext(infile)[0]
 
-	with open('signature.pem', 'rb') as verifier:
-		part1 = verifier.read()
-		privKey = RSAkey
-		pubKey = privKey.publickey()
-		cipher = PKCS1_v1_5.new(pubKey)
-		msg = SHA256.new(key.encode('utf-8'))
+	with open(sigfile, 'rb') as verifier:
+		#part1 = verifier.read()
+		#privKey = verifier.read()
+		#pubKey  = privKey.publickey()
+	#	cipher  = PKCS1_v1_5.new(pubKey)
+#		msg     = SHA256.new(key.encode('utf-8'))
+
+		key = verifier.read().decode('utf-8')
 		
 		#print (signature, " matches? ", fromfile)
 
-		if cipher.verify(msg, part1) :
+#		if cipher.verify(msg, part1) :
 
-			with open(infile, 'rb') as inp:
-				origsize = struct.unpack('<Q', inp.read(struct.calcsize('Q')))[0]
-				iv = inp.read(16).decode('utf-8')
+		with open(infile, 'rb') as inp:
+			origsize = struct.unpack('<Q', inp.read(struct.calcsize('Q')))[0]
+			iv = inp.read(16).decode('utf-8')
+			checkkey = inp.read(len(key)).decode('utf-8')
+
+			if key == checkkey:
+
 				decryptor = AES.new(key, AES.MODE_CBC, iv)
 		
 				with open(outfile, 'wb') as output:
@@ -75,18 +81,25 @@ def decrypt_file(key, RSAkey, infile, outfile=None, chunksize = 24*1024):
 		
 					output.truncate(origsize)
 
-		else:
-			with open(outfile, 'w') as output:
-				output.write('Signature did not match, cannot decrypt the file for you. Please try again.')
+			else:
+				with open(outfile, 'w') as output:
+					output.write('Signature did not match, cannot decrypt the file for you. Please try again.')
 		
 
 #BASE_DIR = os.path.dirname(os.path.abspath(__file__)))
 #ENCRYP_DIR = os.path.join(BASE_DIR, "encrypted.txt")
 
 if __name__ == "__main__":
-	RSAkey = RSA.generate(2048)
-	encrypt_file('aaaaaaaaaaaaaaaa', RSAkey, 'testtext.txt', 'output.txt')
-	decrypt_file('aaaaaaaaaaaaaaab', RSAkey, 'output.txt'  , 'decrypted.txt')
+	filein = input("Enter name of encrypted file: ")
+	signin = input("Enter name of signature file: ")
+	#deckey = input("Enter the key that was given: ")
+
+	#deckey = raw_input("Enter key that was provided by the owner")
+	decrypt_file(signin, filein, "decrypted_output.txt")
+
+#	RSAkey = RSA.generate(2048)
+#	encrypt_file('aaaaaaaaaaaaaaaa', RSAkey, 'testtext.txt', 'output.txt')
+#	decrypt_file('aaaaaaaaaaaaaaab', RSAkey, 'output.txt'  , 'decrypted.txt')
 
 if __name__ == "__main2__":
 

@@ -1,0 +1,17 @@
+
+You searched for "{{ query }}" and the results are listed below.
+
+{% if reports %}
+    <p> Found {{ reports|length }} report{{ reports|pluralize }}</p>
+    <ul>
+        {% for report in reports %}
+        <li>{{ report.short }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p> There is nothing.</p>
+
+
+
+
+{% endif %}

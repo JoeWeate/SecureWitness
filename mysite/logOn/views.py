@@ -9,6 +9,7 @@
 # # Create your views here.
 from logOn.forms import MyRegistrationForm
 from django.shortcuts import render_to_response
+from django.shortcuts import redirect
 from django.contrib import auth
 from django.core.context_processors import csrf
 from django.contrib.auth import authenticate, login
@@ -65,11 +66,8 @@ def register_success(request):
 def home(request):
     return render_to_response('home.html')
 
-
-
-
-
-
+def redirect(request):
+    return HttpResponseRedirect('/SecureWitness')
 
 
 

@@ -45,6 +45,11 @@ class ReportForm(forms.ModelForm):
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
 
+class SelectReportForm(forms.Form):
+	def __init__(self, reports, *args, **kwargs):
+		super(SelectReportForm, self).__init__(*args, **kwargs)
+		self.fields['report'] = forms.ChoiceField(choices = [ (r.id, str(r)) for r in reports])
+
 class EditForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):
 		super(EditForm, self).__init__(*args, **kwargs)

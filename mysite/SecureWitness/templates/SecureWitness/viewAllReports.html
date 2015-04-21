@@ -1,0 +1,15 @@
+{% load securewitness_extras %}
+
+{% if current_user|has_group:'admins' %}
+
+All reports:
+<ul>
+	{% for report in reports %}
+		<li>report.short</li>
+	{% endfor %}
+</ul>
+<br>
+{% else %}
+<p>You don't have access to this function. Must have admin privileges.</p>
+
+{% endif %}

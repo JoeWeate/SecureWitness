@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from SecureWitness.models import Report, Document, Folder
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -36,8 +36,9 @@ def index(request):
 	else:
 		current_user = request.user
 		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+		edit_report_form = SelectReportForm(report_list)
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
-	return render(request,'SecureWitness/index.html',{'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
+	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
 
 
 def register(request):
@@ -241,21 +242,16 @@ def groupSuccess(request):
 	return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
 
 @login_required
-def detail(request, report_id):
+def editReport(request):
 	current_user = request.user
+	report_id = request.POST['report']
 	try:
 		report = Report.objects.get(pk=report_id)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
-	if request.POST:
-		edit_form = EditForm(current_user,request.POST, instance=report)
-		if edit_form.is_valid():
-			edit_form.save()
-			return redirect('/SecureWitness/success')
-	else:
-		edit_form = EditForm(current_user,instance=report)
-	return render_to_response('SecureWitness/detail.html', {'edit_form':edit_form, 'report':report}, context)
+	edit_form = EditForm(current_user,instance=report)
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report}, context)
 
 @login_required
 def create(request):
@@ -276,6 +272,11 @@ def createSuccess(request):
 
 @login_required
 def success(request):
+	current_user = request.user
+	if request.POST:
+		edit_form = EditForm(current_user, data = request.POST)
+	if edit_form.is_valid():
+		edit_form.save()
 	return render(request, 'SecureWitness/success.html')
 
 @login_required
@@ -329,6 +330,17 @@ def folderDelete(request,folder_id):
 		raise Http404("Report does not exist")
 	return render(request, 'SecureWitness/success.html')
 
+# View for displaying all reports in SecureWitness, 
+# accessible only to admin users
+@login_required
+def viewAllReports(request):
+	context = RequestContext(request)
+	current_user = request.user
+	reports = Report.objects.all()
+	return render_to_response('SecureWitness/viewAllReports.html', {'current_user': current_user, 'reports': reports}, context)
+
+# View for adding admin ability to existing user
+# accessible only to admin users
 @login_required
 def addAdmin(request):
 	context = RequestContext(request)
@@ -368,5 +380,3 @@ def reactivateUser(request):
 		suspended.user_set.remove(user)
 	reactivate_user_form = ReactivateUserForm(members)
 	return render_to_response('SecureWitness/reactivateUser.html', {'current_user': current_user, 'reactivate_user_form': reactivate_user_form, 'members': members}, context)
-
-

@@ -6,12 +6,12 @@ Welcome {{current_user.username}}!
 My Reports:
 <br>
 {% if report_list %}
-    <ul>
-    {% for report in report_list %}
-        <li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
-    {% endfor %}
+    <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ edit_report_form.as_p }}
 
-    </ul>
+    <input type="submit" name="submit" value="Edit Report" />
+</form>
 {% else %}
     <p>No reports are available.</p>
 {% endif %}
@@ -43,6 +43,8 @@ My Folders:
 <br>
 {% if current_user|has_group:"admins" %}
 Admin functions:
+<br>
+<a href="viewAllReports">View all reports</a>
 <br>
 <a href="groupCreate">Create a Group</a>
 <br>

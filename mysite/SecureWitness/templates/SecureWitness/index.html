@@ -2,6 +2,17 @@
 
 <h2>Welcome {{current_user.username}}!</h2>
 <br>
+
+
+<form method="get" action="/SecureWitness/search/">
+    {% csrf_token %}
+{#<label for="id_q">Search:</label>#}
+           <input type="text" name="q" />
+           <input type="submit" value="Search"/>
+        </form>
+
+
+
 My Reports:
 {% if report_list %}
     <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">

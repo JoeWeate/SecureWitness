@@ -1,10 +1,8 @@
 {% load securewitness_extras %}
 
-Welcome {{current_user.username}}!
-<br>
+<h2>Welcome {{current_user.username}}!</h2>
 <br>
 My Reports:
-<br>
 {% if report_list %}
     <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
     {% csrf_token %}

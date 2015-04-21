@@ -14,6 +14,17 @@ class Document(models.Model):
 	def __str__(self):
 		return self.name
 
+class UserProfile(models.Model):
+	user = models.OneToOneField(User)
+	activation_key = models.CharField(max_length=40, blank=True)
+	key_expires = models.DateTimeField(default=datetime.date.today())
+	  
+	def __str__(self):
+		return self.user.username
+
+	class Meta:
+		verbose_name_plural=u'User profiles'
+
 
 class Keyword(models.Model):
 	word = models.CharField(max_length=200)
@@ -59,3 +70,4 @@ class Folder(models.Model):
 	pub_date = models.DateTimeField(default=datetime.datetime.today)
 	def __str__(self):
 		return self.name
+		

@@ -27,4 +27,5 @@ urlpatterns = patterns('',
     url(r'^reactivateUser/$', views.reactivateUser, name='reactivateUser'),
     url(r'^viewAllReports/$', views.viewAllReports, name='viewAllReports'),
     url(r'^editReport/$', views.editReport, name='editReport'),
+    url(r'^confirm/(?P<activation_key>\w+)/', ('SecureWitness.views.register_confirm')),
 )

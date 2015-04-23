@@ -38,15 +38,15 @@ class Report(models.Model):
 	# Date and time of incident
 	inc_date = models.DateTimeField(null=True, blank=True)
 	# Short description (1 line)
-	short = models.CharField(max_length=200)
+	short = models.CharField(max_length=200,default="default short")
 	# Detailed description
-	detailed = models.CharField(max_length=2000)
+	detailed = models.CharField(max_length=2000,default="default detail")
 	# Privacy setting (default private)
 	privacy = models.BooleanField(default=True)
 	# Optional document field for uploading one or more documents
 	doc = models.ManyToManyField(Document,null=True,blank=True)
 	# Optional location char field
-	location = models.CharField(max_length=200,blank=True)
+	location = models.CharField(max_length=200,blank=True, default="default location")
 	# Optional keywords associated with report
 	keyword = models.ManyToManyField(Keyword,null=True,blank=True)
 	# Optional group associated with report,
@@ -66,7 +66,7 @@ class Report(models.Model):
 
 class Folder(models.Model):
 	reports = models.ManyToManyField(Report,null=True,blank=True)
-	name = models.CharField(max_length=200)
+	name = models.CharField(max_length=200,default="name")
 	owner = models.ForeignKey(User)
 	pub_date = models.DateTimeField(default=datetime.datetime.today)
 	def __str__(self):

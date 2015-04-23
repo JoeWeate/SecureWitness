@@ -42,7 +42,18 @@ def index(request):
 		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 		edit_report_form = SelectReportForm(report_list)
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
-	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
+		# Get all reports that have public access
+		public_list = Report.objects.filter(privacy=False)
+		# Get all groups that current user is a member of
+		user_groups = current_user.groups.all()
+		# Get all private reports that have been shared with current user by group association
+		shared_list = Report.objects.filter(groups__in=user_groups)
+		# Generate a form to view a selected public report
+		public_reports_form = SelectReportForm(public_list)
+		# Generate a form to view a selected shared report
+		shared_reports_form = SelectReportForm(shared_list)
+	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form})
 
 
 def register(request):
@@ -282,6 +293,19 @@ def groupSuccess(request):
 		print(group_form.errors)
 	return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
 
+# View displaying a report that user has access to
+@login_required
+def viewReport(request):
+	current_user = request.user
+	report_id = request.POST['report']
+	try:
+		report = Report.objects.get(pk=report_id)
+	except Report.DoesNoteExist:
+		raise Http404("Report does not exist")
+	context = RequestContext(request)
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user}, context)
+
+# View for an author to edit a selected report's fields
 @login_required
 def editReport(request):
 	current_user = request.user

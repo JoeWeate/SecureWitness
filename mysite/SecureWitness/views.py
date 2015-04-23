@@ -344,14 +344,7 @@ def createSuccess(request):
 	report = report_form.save()
 	return render(request, 'SecureWitness/success.html')
 
-@login_required
-def success(request):
-	current_user = request.user
-	if request.POST:
-		edit_form = EditForm(current_user, data = request.POST)
-	if edit_form.is_valid():
-		edit_form.save()
-	return render(request, 'SecureWitness/success.html')
+
 
 def commentSuccess(request):
 	context = RequestContext(request)
@@ -389,10 +382,19 @@ def folder(request,folder_id):
 		folder_form = FolderForm(current_user,request.POST, instance=folder)
 		if folder_form.is_valid():
 			folder_form.save()
-			return redirect('/SecureWitness/success')
+			return render_to_response('SecureWitness/success.html')
 	else:
 		folder_form = FolderForm(current_user,instance=folder)
 	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
+
+@login_required
+def success(request):
+	current_user = request.user
+	if request.POST:
+		edit_form = EditForm(current_user, data = request.POST)
+	if edit_form.is_valid():
+		edit_form.save()
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def createFolder(request):
@@ -405,8 +407,8 @@ def createFolder(request):
 def folderSuccess(request):
 	current_user = request.user
 	folder_form = FolderForm(current_user,data=request.POST)
-	#if folder_form.is_valid():
-	folder = folder_form.save()
+	if folder_form.is_valid():
+		folder = folder_form.save()
 	return render(request, 'SecureWitness/folderSuccess.html')
 
 @login_required

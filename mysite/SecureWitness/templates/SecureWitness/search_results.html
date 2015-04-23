@@ -5,11 +5,12 @@ You searched for "{{ query }}" and the results are listed below.
     <p> Found {{ reports|length }} report{{ reports|pluralize }}</p>
     <ul>
         {% for report in reports %}
-        <li>{{ report.short }}</li>
+        <li>{{ report.author }}'s :  {{ report.short }} </li>
+
         {% endfor %}
     </ul>
 {% else %}
-    <p> There is nothing.</p>
+    <p> There are no reports found with that query.</p>
 
 
 

@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from SecureWitness.models import Report, Document, Folder, UserProfile
+from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, CommentForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -244,6 +244,12 @@ def groupCreate(request):
 	group_form = GroupForm()
 	return render_to_response('SecureWitness/groupcreate.html', {'group_form': group_form, 'current_user': current_user}, context)
 
+def commentCreate(request):
+	context = RequestContext(request)
+	current_user = request.user
+	comment_form = CommentForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+	HttpResponseRedirect('SecureWitness/')
+
 # View for displaying all groups current user is in
 @login_required
 def groupList(request):
@@ -292,7 +298,10 @@ def editReport(request):
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	edit_form = EditForm(current_user,instance=report)
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report}, context)
+	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments':comments}, context)
 
 @login_required
 def create(request):
@@ -318,6 +327,20 @@ def success(request):
 		edit_form = EditForm(current_user, data = request.POST)
 	if edit_form.is_valid():
 		edit_form.save()
+	return render(request, 'SecureWitness/success.html')
+
+def commentSuccess(request):
+	context = RequestContext(request)
+	comment_form = CommentForm(data=request.POST)
+	comment = comment_form.save()
+	return HttpResponseRedirect('/SecureWitness')
+
+def commentDelete(request, comment_id):
+	try:
+		report = Comment.objects.get(pk=comment_id)
+		report.delete()
+	except Report.DoesNotExist:
+		raise Http404("Comment does not exist")
 	return render(request, 'SecureWitness/success.html')
 
 @login_required
@@ -423,11 +446,12 @@ def reactivateUser(request):
 	return render_to_response('SecureWitness/reactivateUser.html', {'current_user': current_user, 'reactivate_user_form': reactivate_user_form, 'members': members}, context)
 
 def search(request):
-    if 'q' in request.GET and request.GET['q']:
-        q = request.GET['q']
-        r1 = Report.objects.filter(short__icontains=q)
-        r2 = Report.objects.filter(short__icontains=q)
-        reports = r1 | r2
-        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    else:
-        return HttpResponse('No results found. Please try another search term.')
+	if 'q' in request.GET and request.GET['q']:
+		q = request.GET['q']
+		r1 = Report.objects.filter(short__icontains=q)
+		r2 = Report.objects.filter(short__icontains=q)
+		reports = r1 | r2
+		return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+	else:
+		return HttpResponse('No results found. Please try another search term.')
+	

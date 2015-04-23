@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report,Folder, Document
+from SecureWitness.models import Report,Folder, Document, Comment
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -26,6 +26,8 @@ class UserForm(forms.ModelForm):
 			user.save()
 
 		return user
+
+
 
 class AddUserForm(forms.Form):
 	def __init__(self, *args, **kwargs):
@@ -62,6 +64,12 @@ class ReportForm(forms.ModelForm):
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput()}
+
+class CommentForm(forms.ModelForm):
+	class Meta:
+		model = Comment
+		fields = ('content','report','author')
+		widgets = {'author':forms.HiddenInput(),'report':forms.HiddenInput()}
 
 class SelectReportForm(forms.Form):
 	def __init__(self, reports, *args, **kwargs):

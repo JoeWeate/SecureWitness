@@ -1,6 +1,4 @@
-Edit Content:
-<br>
-
+<h2>Edit Content:</h2>
 <!-- <form action="/SecureWitness/edit_report/" action="post">
 {% csrf_token %}
     author: <input type='text' name = 'author' value ='{{report.id}}'><br>
@@ -18,6 +16,19 @@ Edit Content:
 <form action='/SecureWitness/delete/{{report.id}}'>
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
+
+<h2>Comments:</h2>
+{% for comment in comments %}
+<li>{{comment}} -by {{comment.author}} at {{comment.pub_date}} <a href = '/SecureWitness/commentDelete/{{comment.id}}'>Delete</a></li>
 <br>
+{% endfor %}
+
+<form id="comment_form" method="post" action="/SecureWitness/commentSuccess/" enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ comment_form.as_p }}
+
+		<input type="submit" name="submit" value="Add Comment" />
+</form>
+
 
 <a href="/SecureWitness/">Home</a>

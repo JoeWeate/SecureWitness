@@ -14,6 +14,7 @@ class Document(models.Model):
 	def __str__(self):
 		return self.name
 
+
 class UserProfile(models.Model):
 	user = models.OneToOneField(User)
 	activation_key = models.CharField(max_length=40, blank=True)
@@ -70,4 +71,11 @@ class Folder(models.Model):
 	pub_date = models.DateTimeField(default=datetime.datetime.today)
 	def __str__(self):
 		return self.name
-		
+
+class Comment(models.Model):
+	content = models.CharField(max_length=200)
+	pub_date = models.DateTimeField(default=datetime.datetime.today)
+	author = models.ForeignKey(User)
+	report = models.ForeignKey(Report)
+	def __str__(self):
+		return self.content

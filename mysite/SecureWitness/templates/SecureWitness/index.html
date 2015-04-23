@@ -37,6 +37,22 @@ My Folders:
 {% else %}
     <p>No folders are available.</p>
 {% endif %}
+<br>
+Public reports:
+<form id="public_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ public_reports_form.as_p }}
+
+    <input type="submit" name="submit" value="View selected Report" />
+</form>
+<br>
+Reports shared with me (public and private):
+<form id="shared_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ shared_reports_form.as_p }}
+
+    <input type="submit" name="submit" value="View selected Report" />
+</form>
 
 
 <!-- {% for folder in folder_list %}

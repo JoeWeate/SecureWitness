@@ -1,0 +1,17 @@
+
+You did not search for anything.  Displaying ALL results.
+
+{% if reports %}
+    <p> Found {{ reports|length }} report{{ reports|pluralize }}</p>
+    <ul>
+        {% for report in reports %}
+        <li>{{ report.author }}'s :  {{ report.short }} </li>
+
+        {% endfor %}
+    </ul>
+{% else %}
+    <p> There are no reports.</p>
+
+
+
+{% endif %}

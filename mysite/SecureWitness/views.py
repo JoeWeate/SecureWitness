@@ -326,8 +326,10 @@ def editReport(request):
 	edit_form = EditForm(current_user,instance=report)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	shared_groups = report.groups.all()
+	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments':comments}, context)
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
 
 @login_required
 def create(request):

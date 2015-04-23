@@ -471,13 +471,19 @@ def reactivateUser(request):
 	reactivate_user_form = ReactivateUserForm(members)
 	return render_to_response('SecureWitness/reactivateUser.html', {'current_user': current_user, 'reactivate_user_form': reactivate_user_form, 'members': members}, context)
 
+
 def search(request):
-	if 'q' in request.GET and request.GET['q']:
-		q = request.GET['q']
-		r1 = Report.objects.filter(short__icontains=q)
-		r2 = Report.objects.filter(short__icontains=q)
-		reports = r1 | r2
-		return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-	else:
-		return HttpResponse('No results found. Please try another search term.')
-	
+    if 'q' in request.GET and request.GET['q']:
+        q = request.GET['q']
+        r1 = Report.objects.filter(short__icontains=q)
+        r2 = Report.objects.filter(location__icontains=q)
+        r3 = Report.objects.filter(detailed__icontains=q)
+        # r4 = Report.objects.filter(keyword__word__icontains=q)
+        r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
+        reports = (r1 | r2) & r3
+        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+    else:
+        reports= Report.objects.all
+        q=""
+        return render(request, 'SecureWitness/search_results2.html', {'reports': reports, 'query': q})
+

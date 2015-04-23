@@ -309,7 +309,9 @@ def viewReport(request):
 	except Report.DoesNoteExist:
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
-	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user}, context)
+	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments}, context)
 
 # View for an author to edit a selected report's fields
 @login_required
@@ -350,7 +352,7 @@ def commentSuccess(request):
 	context = RequestContext(request)
 	comment_form = CommentForm(data=request.POST)
 	comment = comment_form.save()
-	return HttpResponseRedirect('/SecureWitness')
+	return render(request, 'SecureWitness/success.html')
 
 def commentDelete(request, comment_id):
 	try:

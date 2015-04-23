@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from SecureWitness.models import Report, Document, Folder, UserProfile
+from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, CommentForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -42,7 +42,18 @@ def index(request):
 		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 		edit_report_form = SelectReportForm(report_list)
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
-	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
+		# Get all reports that have public access
+		public_list = Report.objects.filter(privacy=False)
+		# Get all groups that current user is a member of
+		user_groups = current_user.groups.all()
+		# Get all private reports that have been shared with current user by group association
+		shared_list = Report.objects.filter(groups__in=user_groups)
+		# Generate a form to view a selected public report
+		public_reports_form = SelectReportForm(public_list)
+		# Generate a form to view a selected shared report
+		shared_reports_form = SelectReportForm(shared_list)
+	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form})
 
 
 def register(request):
@@ -244,6 +255,12 @@ def groupCreate(request):
 	group_form = GroupForm()
 	return render_to_response('SecureWitness/groupcreate.html', {'group_form': group_form, 'current_user': current_user}, context)
 
+def commentCreate(request):
+	context = RequestContext(request)
+	current_user = request.user
+	comment_form = CommentForm(initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+	HttpResponseRedirect('SecureWitness/')
+
 # View for displaying all groups current user is in
 @login_required
 def groupList(request):
@@ -282,6 +299,19 @@ def groupSuccess(request):
 		print(group_form.errors)
 	return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
 
+# View displaying a report that user has access to
+@login_required
+def viewReport(request):
+	current_user = request.user
+	report_id = request.POST['report']
+	try:
+		report = Report.objects.get(pk=report_id)
+	except Report.DoesNoteExist:
+		raise Http404("Report does not exist")
+	context = RequestContext(request)
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user}, context)
+
+# View for an author to edit a selected report's fields
 @login_required
 def editReport(request):
 	current_user = request.user
@@ -292,7 +322,10 @@ def editReport(request):
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	edit_form = EditForm(current_user,instance=report)
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report}, context)
+	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments':comments}, context)
 
 @login_required
 def create(request):
@@ -318,6 +351,20 @@ def success(request):
 		edit_form = EditForm(current_user, data = request.POST)
 	if edit_form.is_valid():
 		edit_form.save()
+	return render(request, 'SecureWitness/success.html')
+
+def commentSuccess(request):
+	context = RequestContext(request)
+	comment_form = CommentForm(data=request.POST)
+	comment = comment_form.save()
+	return HttpResponseRedirect('/SecureWitness')
+
+def commentDelete(request, comment_id):
+	try:
+		report = Comment.objects.get(pk=comment_id)
+		report.delete()
+	except Report.DoesNotExist:
+		raise Http404("Comment does not exist")
 	return render(request, 'SecureWitness/success.html')
 
 @login_required
@@ -437,3 +484,4 @@ def search(request):
         reports= Report.objects.all
         q=""
         return render(request, 'SecureWitness/search_results2.html', {'reports': reports, 'query': q})
+

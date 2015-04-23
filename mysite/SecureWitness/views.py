@@ -278,13 +278,14 @@ def groupView(request, group_id):
 		group = Group.objects.get(pk=group_id)
 		group_members = group.user_set.all()
 		reports = Report.objects.filter(groups=group)
+		reports_form = SelectReportForm(reports)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		group.user_set.add(user)
 	add_user_form = AddUserForm()
-	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
+	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports_form': reports_form, 'add_user_form': add_user_form}, context)
 
 # View displayed after succesfully creating a new group
 @login_required

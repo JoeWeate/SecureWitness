@@ -490,5 +490,20 @@ def search(request):
         reports = reports & r3
         return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
     else:
-        reports= Report.objects.all
+        reports= Report.objects.filter(privacy=False)
+        # if user is admin reports= Report.objects.all
+        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+
+def search2(request):
+    if 'q' in request.GET and request.GET['q']:
+        q = request.GET['q']
+        reports= Report.objects.filter(privacy=False)
+        for words in q.split():
+            r1 = Report.objects.filter(short__icontains=words)
+            r2 = Report.objects.filter(location__icontains=words)
+            reports = reports & (r1 | r2)
+
+        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+    else:
+        reports=Report.objects.filter(privacy=False)
         return render(request, 'SecureWitness/search_results2.html', {'reports': reports})

@@ -32,4 +32,6 @@ urlpatterns = patterns('',
     url(r'^confirm/(?P<activation_key>\w+)/', ('SecureWitness.views.register_confirm')),
     url(r'^search/$',views.search, name='search'),
     url(r'^viewReport/$', views.viewReport, name='viewReport'),
+    url(r'^search2/$',views.search2, name='search2'),
+
 )

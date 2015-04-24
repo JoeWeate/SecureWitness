@@ -7,10 +7,15 @@
 <form method="get" action="/SecureWitness/search/">
     {% csrf_token %}
 {#<label for="id_q">Search:</label>#}
-           <input type="text" name="q" />
+           <input placeholder="OR" type="text" name="q" />
            <input type="submit" value="Search"/>
         </form>
 
+<form method="get" action="/SecureWitness/search2/">
+    {% csrf_token %}
+           <input placeholder="AND" type="text" name="q" />
+           <input type="submit" value="Search"/>
+</form>
 
 
 My Reports:

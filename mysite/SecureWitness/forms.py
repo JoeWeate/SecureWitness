@@ -82,7 +82,7 @@ class EditForm(forms.ModelForm):
 		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
 	class Meta:
 		model = Report
-		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location')
+		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups')
 		widgets = {'author':forms.HiddenInput()}
 
 class FolderForm(forms.ModelForm):

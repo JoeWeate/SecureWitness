@@ -278,13 +278,14 @@ def groupView(request, group_id):
 		group = Group.objects.get(pk=group_id)
 		group_members = group.user_set.all()
 		reports = Report.objects.filter(groups=group)
+		reports_form = SelectReportForm(reports)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		group.user_set.add(user)
 	add_user_form = AddUserForm()
-	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
+	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports_form': reports_form, 'add_user_form': add_user_form}, context)
 
 # View displayed after succesfully creating a new group
 @login_required
@@ -309,7 +310,9 @@ def viewReport(request):
 	except Report.DoesNoteExist:
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
-	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user}, context)
+	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments}, context)
 
 # View for an author to edit a selected report's fields
 @login_required
@@ -324,8 +327,10 @@ def editReport(request):
 	edit_form = EditForm(current_user,instance=report)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	shared_groups = report.groups.all()
+	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments':comments}, context)
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
 
 @login_required
 def create(request):
@@ -344,20 +349,13 @@ def createSuccess(request):
 	report = report_form.save()
 	return render(request, 'SecureWitness/success.html')
 
-@login_required
-def success(request):
-	current_user = request.user
-	if request.POST:
-		edit_form = EditForm(current_user, data = request.POST)
-	if edit_form.is_valid():
-		edit_form.save()
-	return render(request, 'SecureWitness/success.html')
+
 
 def commentSuccess(request):
 	context = RequestContext(request)
 	comment_form = CommentForm(data=request.POST)
 	comment = comment_form.save()
-	return HttpResponseRedirect('/SecureWitness')
+	return render(request, 'SecureWitness/success.html')
 
 def commentDelete(request, comment_id):
 	try:
@@ -389,10 +387,19 @@ def folder(request,folder_id):
 		folder_form = FolderForm(current_user,request.POST, instance=folder)
 		if folder_form.is_valid():
 			folder_form.save()
-			return redirect('/SecureWitness/success')
+			return render_to_response('SecureWitness/success.html')
 	else:
 		folder_form = FolderForm(current_user,instance=folder)
 	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
+
+@login_required
+def success(request):
+	current_user = request.user
+	if request.POST:
+		edit_form = EditForm(current_user, data = request.POST)
+	if edit_form.is_valid():
+		edit_form.save()
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def createFolder(request):
@@ -405,8 +412,8 @@ def createFolder(request):
 def folderSuccess(request):
 	current_user = request.user
 	folder_form = FolderForm(current_user,data=request.POST)
-	#if folder_form.is_valid():
-	folder = folder_form.save()
+	if folder_form.is_valid():
+		folder = folder_form.save()
 	return render(request, 'SecureWitness/folderSuccess.html')
 
 @login_required

@@ -12,11 +12,12 @@ Group Members:
 </ul>
 <br>
 Associated Reports:
-<ul>
-	{% for report in reports%}
-		<li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
-	{% endfor %}
-</ul>
+<form id="reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ reports_form.as_p }}
+
+	<input type="submit" name="submit" value="View Report" />
+</form>
 <br>
 <form id="add_user_form" method="post" action="/SecureWitness/groupView/{{ group.id }}/"
 			enctype="multipart/form-data">

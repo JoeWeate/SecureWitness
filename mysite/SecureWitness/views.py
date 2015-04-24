@@ -473,15 +473,15 @@ def reactivateUser(request):
 def search(request):
     if 'q' in request.GET and request.GET['q']:
         q = request.GET['q']
-        r1 = Report.objects.filter(short__icontains=q)
-        r2 = Report.objects.filter(location__icontains=q)
-        r3 = Report.objects.filter(detailed__icontains=q)
-        # r4 = Report.objects.filter(keyword__word__icontains=q)
+        reports= Report.objects.filter(short__icontains=q)  #initializes reports
+        for words in q.split():
+            r1 = Report.objects.filter(short__icontains=words)
+            r2 = Report.objects.filter(location__icontains=words)
+            # r4 = Report.objects.filter(keyword__word__icontains=q)
+            reports = reports | (r1 | r2)
         r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-        reports = (r1 | r2) & r3
+        reports = reports & r3
         return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
     else:
         reports= Report.objects.all
-        q=""
-        return render(request, 'SecureWitness/search_results2.html', {'reports': reports, 'query': q})
-
+        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})

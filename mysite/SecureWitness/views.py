@@ -12,6 +12,7 @@ from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, A
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth import login
+from django.contrib.auth import authenticate
 
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
@@ -44,6 +45,15 @@ def index(request):
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
 
+def remotelogin(request):
+	print('Trying to do remote login')
+	print(request.POST['username'])
+	print(request.POST['password'])
+	user = authenticate(username = request.POST['username'], password = request.POST['password'])
+	print('Authenticated user')
+	login(request, user)
+	print('logged user in')
+	return HttpResponse("Logged In")
 
 def register(request):
 	# Like before, get the request's context.

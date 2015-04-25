@@ -7,11 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-<<<<<<< HEAD
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm
-=======
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, CommentForm
->>>>>>> 4ac1e224db4474c5c070821d42d4fc9db7732c3c
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -76,13 +72,13 @@ def login(request):
 			password = request.POST['password']
 
 			user = authenticate(username=username, password=password)
-
+			print(user)
 			if user is not None:
 					if user.is_active:
 						auth_login(request, user)
-						return render_to_response('accounts/login.html', context)
+						return HttpResponse('Login successful')
 					else:
-						return HttpResponse('Invalid User')
+						return HttpResponse('Invalid Login Info')
 			else:
 				return HttpResponse("Invalid Login Info")
 

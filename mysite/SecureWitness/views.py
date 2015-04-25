@@ -48,7 +48,7 @@ def index(request):
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
 
-@csrf_exempt
+#@csrf_exempt
 def login(request):
 	context = RequestContext(request)
 	print(context)

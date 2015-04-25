@@ -8,6 +8,7 @@ checkurl = 'http://127.0.0.1:8000/SecureWitness/remotelogin/'
 
 if __name__ == "__main__":
 	
+	#Ask for login
 	username = input("What is your username: ")
 	password = input("What is your password: ")
 
@@ -22,4 +23,14 @@ if __name__ == "__main__":
 	
 	r1 = requests.post(loginurl, data = logindata, headers = dict(Referer=loginurl), cookies=cookies)
 
-	print(r1.status_code)
+	while(True):
+		command = input("Enter command")
+
+		if command == "ls -public"
+			print("Showing all public files")
+		elif command == "ls -a"
+			print("Showing all shared files")
+		elif command == "ls -p"
+			print("Showing all shared private files")
+		elif command == "obtain"
+			input("What file would you like: ")

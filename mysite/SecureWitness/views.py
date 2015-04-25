@@ -570,7 +570,7 @@ def execute(request):
 					folder_str = folder_str + ', ' + folder.name
 				if len(folder_str) > 0:
 					folder_str = folder_str[2:]
-				elif len(folder_str <= 2):
+				elif len(folder_str) <= 2:
 					folder_str = '**You have no folders currently**'
 				print(folder_str)
 				return HttpResponse(folder_str)	

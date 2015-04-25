@@ -24,13 +24,15 @@ if __name__ == "__main__":
 	r1 = requests.post(loginurl, data = logindata, headers = dict(Referer=loginurl), cookies=cookies)
 
 	while(True):
-		command = input("Enter command")
+		command = input("Enter command\n")
 
-		if command == "ls -public"
+		if command == "ls -public":
 			print("Showing all public files")
-		elif command == "ls -a"
+		elif command == "ls -a":
 			print("Showing all shared files")
-		elif command == "ls -p"
+		elif command == "ls -p":
 			print("Showing all shared private files")
-		elif command == "obtain"
+		elif command == "obtain":
 			input("What file would you like: ")
+		elif command == "killall":
+			break

@@ -47,11 +47,14 @@ def index(request):
 
 def remotelogin(request):
 	print('Trying to do remote login')
+	print(request.POST)
 	print(request.POST['username'])
 	print(request.POST['password'])
-	user = authenticate(username = request.POST['username'], password = request.POST['password'])
-	print('Authenticated user')
-	login(request, user)
+	#user = authenticate(username = request.POST['username'], password = request.POST['password'])
+	#if not user.is_authenticated():
+	#	return redirent('accounts/login')
+	#print('Authenticated user')
+#	login(request, user)
 	print('logged user in')
 	return HttpResponse("Logged In")
 

@@ -602,7 +602,8 @@ def execute(request):
 
 			elif filt == 'groups':
 				# Get all groups that current user is a member of
-				user_groups = current_user.groups.all()				
+				user_groups = request.user.groups.all()			
+				print(type(user_groups))	
 
 			elif filt == 'priv':
 				# Get all private reports that have been shared with current user by group association
@@ -618,12 +619,58 @@ def execute(request):
 					rep_str = '**You have no files currently**'
 				return HttpResponse(rep_str)	
 
-			elif filt == 'down':
-				filename = request.POST['filename']
+			elif filt == 'haveaccess':
+				filename = request.POST['report']
+				can_get = False
+				to_get = None
 				user_groups = current_user.groups.all()
 				shared_list = Report.objects.filter(groups__in=user_groups)
 				public_list = Report.objects.filter(privacy=False)
-				if filename not in shared_list and filename not in public_list:
-					return HttpResponse("You do not have permission to access a file with this name.")
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+
+				for rep in shared_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In shared list")
+				for rep in public_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In public list")
+				for rep in report_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In authored list")	
+
+				if can_get:
+					return HttpResponse("Can access report")					
+
+				return HttpResponse("You do not have permission to access a report with this name.")
+
+			# elif filt == 'files':
+			# 	reportname = request.POST['report']
+			# 	user_groups = current_user.groups.all()
+			# 	shared_list = Report.objects.filter(groups__in=user_groups)
+			# 	public_list = Report.objects.filter(privacy=False)
+			# 	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+
+			# 	accessible_list = []
+
+			# 	for rep in shared_list:
+			# 		accessible_list.append(rep)
+			# 	for rep in public_list:
+			# 		if rep not in accessible_list:
+			# 			accessible_list.append(rep)
+			# 	for rep in report_list:
+			# 		if rep not in accessible_list:
+			# 			accessible_list.append(rep)				
+
+			# 	for rep in accessible_list:
+			# 		if rep.short == reportname:
+			# 			print(rep.doc)
+
+
 	
 	return render_to_response('SecureWitness/execute.html', context)

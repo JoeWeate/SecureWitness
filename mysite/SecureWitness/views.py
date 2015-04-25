@@ -7,11 +7,11 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.contrib.auth import login
+from django.contrib.auth import login as auth_login
 from django.contrib.auth import authenticate
 
 from django.shortcuts import render, render_to_response
@@ -34,6 +34,9 @@ from django.core.files import File
 from django.core.mail import send_mail
 import hashlib, datetime, random
 from django.utils import timezone
+
+from django.views.decorators.csrf import csrf_exempt
+
 @login_required
 def index(request):
 	if not request.user.is_authenticated():
@@ -45,18 +48,34 @@ def index(request):
 		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,'current_user': current_user,'folder_list':folder_list})
 
-def remotelogin(request):
-	print('Trying to do remote login')
-	print(request.POST)
-	print(request.POST['username'])
-	print(request.POST['password'])
-	#user = authenticate(username = request.POST['username'], password = request.POST['password'])
-	#if not user.is_authenticated():
-	#	return redirent('accounts/login')
-	#print('Authenticated user')
-#	login(request, user)
-	print('logged user in')
-	return HttpResponse("Logged In")
+@csrf_exempt
+def login(request):
+	context = RequestContext(request)
+	print(context)
+	#c = RequestContext(request, {'next': '/SecureWitness/'})
+	if request.method == 'POST':
+		
+		login_form = LoginForm(data=request.POST)
+		if login_form.is_valid():
+			username = request.POST['username']
+			password = request.POST['password']
+
+			user = authenticate(username=username, password=password)
+
+			if user is not None:
+					if user.is_active:
+						auth_login(request, user)
+						return render_to_response('accounts/login.html', context)
+					else:
+						return HttpResponse('Invalid User')
+			else:
+				return HttpResponse("Invalid Login Info")
+
+	else:
+		login_form = LoginForm()
+
+	return render_to_response('SecureWitness/login.html', 
+								context)
 
 def register(request):
 	# Like before, get the request's context.

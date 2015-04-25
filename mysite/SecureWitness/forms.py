@@ -27,6 +27,10 @@ class UserForm(forms.ModelForm):
 
 		return user
 
+class LoginForm(forms.Form):
+	username = forms.CharField(label = 'Username: ')
+	password = forms.CharField(label = 'Password: ', widget = forms.PasswordInput())
+
 class AddUserForm(forms.Form):
 	def __init__(self, *args, **kwargs):
 		super(AddUserForm, self).__init__(*args, **kwargs)

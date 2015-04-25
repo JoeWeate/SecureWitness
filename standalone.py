@@ -1,27 +1,25 @@
 import requests
-#import json
+import json
+import sys
 
+loginurl = "http://127.0.0.1:8000/accounts/login/"
+checkurl = 'http://127.0.0.1:8000/SecureWitness/remotelogin/'
 
-loginurl = "http://127.0.0.1:8000/accounts/login"
-checkurl = 'http://127.0.0.1:8000/SecureWitness/remotelogin'
 
 if __name__ == "__main__":
 	
 	username = input("What is your username: ")
 	password = input("What is your password: ")
 
-	#r0 = requests.get(loginurl)
-	#csrftoken = r0.cookies['csrftoken']
 
-	#logindata = {'username': username, 'password': password, 'csrfmiddlewaretoken': csrftoken}
+	client = requests.session()
 
-	rcheck = requests.get(checkurl)
-	checklogin = {'username': username, 'password': password}	
-#	jsonparams = json.dumps(logindata)
-#	headers = {'Content-Type': 'SecureWitness/json'}
+	r0 = client.get(loginurl)
+	cookies = dict(client.cookies)
+	token = client.cookies['csrftoken']
 
-	r1 = requests.post(checkurl, data=checklogin)
+	logindata = {'username': username, 'password': password, 'csrfmiddlewaretoken': token, 'next': '/'}
+	
+	r1 = requests.post(loginurl, data = logindata, headers = dict(Referer=loginurl), cookies=cookies)
 
-	print(rcheck.status_code)
-	print(rcheck.content)
 	print(r1.status_code)

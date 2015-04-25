@@ -60,23 +60,43 @@ if __name__ == "__main__":
 				payload = {'filter': 'pub', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				print(r.content.decode('utf-8'))
+
 			elif command == 'ls -m':
 				payload = {'filter': 'authored', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				print(r.content.decode('utf-8'))
+
 			elif command == "ls -a":
 				print("Showing all shared files")
+
 			elif command == "ls -priv":
 				print("Showing all shared private files")
 				payload = {'filter': 'priv', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
-				print(r.content.decode('utf-8'))				
+				print(r.content.decode('utf-8'))		
+
 			elif command == 'ls -d':
 				payload = {'filter': 'dirs', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
-				print(r.content.decode('utf-8'))				
-			elif command == "obtain":
-				input("What file would you like: ")
+				print(r.content.decode('utf-8'))		
+
+			elif command == 'groups':
+				payload = {'filter': 'groups', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
+				r = client.post(cmdurl, data = payload, cookies = cookies)
+				print(r.content.decode('utf-8'))		
+
+			elif command == "get":
+				reportname = input("What report would you like to access: ")
+				payload = {'filter': 'haveaccess', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
+				r = client.post(cmdurl, data = payload, cookies = cookies)
+				print(r.content.decode('utf-8'))	
+
+				# if r.content.decode('utf-8') == 'True':
+				# 	print('Files associated with this report are shown below')
+				# 	payload = {'filter': 'files', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
+				# 	r = client.post(cmdurl, data = payload, cookies = cookies)
+				# 	print(r.content.decode('utf-8'))
+
 			elif command == "kill":
 				break
 	else:

@@ -645,7 +645,15 @@ def execute(request):
 						print("In authored list")	
 
 				if can_get:
-					return HttpResponse("Can access report")					
+					temp = to_get.doc.all()
+					filearray = ''
+					for file1 in temp:
+						filearray = filearray + ', ' + file1.name
+					if len(filearray) > 0:
+						filearray = filearray[2:]
+					# if len(temp) > 0:
+					# 	print(temp)
+					return HttpResponse("Files in this report: " + filearray)					
 
 				return HttpResponse("You do not have permission to access a report with this name.")
 

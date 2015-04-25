@@ -34,4 +34,5 @@ urlpatterns = patterns('',
     url(r'^search/$',views.search, name='search'),
     url(r'^viewReport/$', views.viewReport, name='viewReport'),
     url(r'^search2/$',views.search2, name='search2'),
+    url(r'^execute/$',views.execute, name='execute')
 )

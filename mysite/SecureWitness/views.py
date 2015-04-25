@@ -37,6 +37,8 @@ from django.utils import timezone
 
 from django.views.decorators.csrf import csrf_exempt
 
+import json
+
 @login_required
 def index(request):
 	if not request.user.is_authenticated():
@@ -525,51 +527,103 @@ def login(request):
 			password = request.POST['password']
 
 			user = authenticate(username=username, password=password)
-			print(user)
+			#print(user)
 			if user is not None:
 					if user.is_active:
 						auth_login(request, user)
-						return HttpResponse('Login successful')
+						return render_to_response('SecureWitness/execute.html', 
+								context)
 					else:
-						return HttpResponse('Invalid Login Info')
+						return render_to_response('SecureWitness/login.html', 
+								context)
 			else:
-				return HttpResponse("Invalid Login Info")
-
+				return render_to_response('SecureWitness/login.html', 
+								context)
+	# elif request.method == 'GET':
+	# 	login_form = LoginForm()
+	# 	request.cookies['sessionid'] = request.session._get_or_create_session_key()
+	# 	return render('SecureWitness/login.html')
 	else:
 		login_form = LoginForm()
+
 
 	return render_to_response('SecureWitness/login.html', 
 								context)
 
-@login_required
-def retrieveFilesFolders(request):
+
+def execute(request):
 
 	context = RequestContext(request)
-
 	if request.method == 'POST':
 		filt = request.POST['filter']
-
+		print(filt)
 		if not request.user.is_authenticated():
+			print('Not authed')
 			return HttpResponse("You are not an authenticated user. You cannot view files.")
 		else:
 			current_user = request.user
-			report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
-			edit_report_form = SelectReportForm(report_list)
-			
+			print(filt)
 			if filt == 'dirs':
 				folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
+				folder_str = ''
+				for folder in folder_list:
+					folder_str = folder_str + ', ' + folder.name
+				if len(folder_str) > 0:
+					folder_str = folder_str[2:]
+				elif len(folder_str <= 2):
+					folder_str = '**You have no folders currently**'
+				print(folder_str)
+				return HttpResponse(folder_str)	
+
+			elif filt == 'authored':
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+				#print(type(report_list[0].short))
+				rep_str = ''
+				for rep in report_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)		
+
 			elif filt == 'pub':
 				# Get all reports that have public access
 				public_list = Report.objects.filter(privacy=False)
+				print(public_list)
+				rep_str = ''
+				for rep in public_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)	
+
 			elif filt == 'groups':
 				# Get all groups that current user is a member of
-				user_groups = current_user.groups.all()
+				user_groups = current_user.groups.all()				
+
 			elif filt == 'priv':
 				# Get all private reports that have been shared with current user by group association
+				user_groups = current_user.groups.all()
 				shared_list = Report.objects.filter(groups__in=user_groups)
+				print(shared_list)
+				rep_str = ''
+				for rep in shared_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)	
+
 			elif filt == 'down':
 				filename = request.POST['filename']
+				user_groups = current_user.groups.all()
 				shared_list = Report.objects.filter(groups__in=user_groups)
 				public_list = Report.objects.filter(privacy=False)
 				if filename not in shared_list and filename not in public_list:
 					return HttpResponse("You do not have permission to access a file with this name.")
+	
+	return render_to_response('SecureWitness/execute.html', context)

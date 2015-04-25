@@ -6,22 +6,19 @@
 
     <body>
 
-        <strong>Login here!</strong><br />
+        <strong>Enter command</strong><br />
 
-        <form id="login_form" method="post" action="/SecureWitness/login/"
+        <form id="cmd_form" method="post" action="/SecureWitness/execute/"
                 enctype="multipart/form-data">
 
             {% csrf_token %}
-            <input type="hidden" name="sessionid" value={{request.session.name}}/>
 
             <!-- Display each form. The as_p method wraps each element in a paragraph
                  (<p>) element. This ensures each element appears on a new line,
                  making everything look neater. -->
-            {{ login_form.as_p }}
+            {{ cmd_form.as_p }}
 
-            <input type="username" name="username" label="Username"/>
-            <br/>
-            <input type="password" name="password" label="Password"/>
+            <input type="text" name="filter" label="Username"/>
             <br/>
             <!-- Provide a button to click to submit the form. -->
             <input type="submit" name="submit" value="Login" />

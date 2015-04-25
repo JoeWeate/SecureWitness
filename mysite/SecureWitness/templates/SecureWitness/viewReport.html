@@ -1,0 +1,30 @@
+Report: {{ report.id }}
+<br>
+Short description: {{ report.short }}
+<br>
+Author: {{ report.author }}
+<br>
+Publication Date: {{ report.pub_date }}
+<br>
+Incident Date: {{ report.inc_date }}
+<br>
+Detailed Description: {{ report.detailed }}
+<br>
+Location: {{ report.location }}
+
+<h2>Comments:</h2>
+{% if comments %}
+{% for comment in comments %}
+<li>{{comment}} -by {{comment.author}} at {{comment.pub_date}} <a href = '/SecureWitness/commentDelete/{{comment.id}}'>Delete</a></li>
+<br>
+{% endfor %}
+{% else %}
+No comments yet!
+{% endif %}
+
+<form id="comment_form" method="post" action="/SecureWitness/commentSuccess/" enctype="multipart/form-data">
+		{% csrf_token%}
+		{{ comment_form.as_p }}
+
+		<input type="submit" name="submit" value="Add Comment" />
+</form>

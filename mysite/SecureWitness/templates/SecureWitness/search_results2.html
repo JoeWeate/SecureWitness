@@ -1,5 +1,5 @@
 
-You searched for "{{ query }}" and the results are listed below.
+You did not search for anything.  Displaying ALL results.
 
 {% if reports %}
     <p> Found {{ reports|length }} report{{ reports|pluralize }}</p>
@@ -10,8 +10,7 @@ You searched for "{{ query }}" and the results are listed below.
         {% endfor %}
     </ul>
 {% else %}
-    <p> There are no reports found with that query.</p>
-
+    <p> There are no reports.</p>
 
 
 

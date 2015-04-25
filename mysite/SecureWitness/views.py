@@ -59,35 +59,6 @@ def index(request):
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form})
 
-#@csrf_exempt
-def login(request):
-	context = RequestContext(request)
-	print(context)
-	#c = RequestContext(request, {'next': '/SecureWitness/'})
-	if request.method == 'POST':
-		
-		login_form = LoginForm(data=request.POST)
-		if login_form.is_valid():
-			username = request.POST['username']
-			password = request.POST['password']
-
-			user = authenticate(username=username, password=password)
-			print(user)
-			if user is not None:
-					if user.is_active:
-						auth_login(request, user)
-						return HttpResponse('Login successful')
-					else:
-						return HttpResponse('Invalid Login Info')
-			else:
-				return HttpResponse("Invalid Login Info")
-
-	else:
-		login_form = LoginForm()
-
-	return render_to_response('SecureWitness/login.html', 
-								context)
-
 def register(request):
 	# Like before, get the request's context.
 	context = RequestContext(request)
@@ -539,3 +510,66 @@ def search2(request):
     else:
         reports=Report.objects.filter(privacy=False)
         return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+
+
+#The following methods are ONLY for the command line interface
+
+def login(request):
+	context = RequestContext(request)
+
+	if request.method == 'POST':
+		
+		login_form = LoginForm(data=request.POST)
+		if login_form.is_valid():
+			username = request.POST['username']
+			password = request.POST['password']
+
+			user = authenticate(username=username, password=password)
+			print(user)
+			if user is not None:
+					if user.is_active:
+						auth_login(request, user)
+						return HttpResponse('Login successful')
+					else:
+						return HttpResponse('Invalid Login Info')
+			else:
+				return HttpResponse("Invalid Login Info")
+
+	else:
+		login_form = LoginForm()
+
+	return render_to_response('SecureWitness/login.html', 
+								context)
+
+@login_required
+def retrieveFilesFolders(request):
+
+	context = RequestContext(request)
+
+	if request.method == 'POST':
+		filt = request.POST['filter']
+
+		if not request.user.is_authenticated():
+			return HttpResponse("You are not an authenticated user. You cannot view files.")
+		else:
+			current_user = request.user
+			report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+			edit_report_form = SelectReportForm(report_list)
+			
+			if filt == 'dirs':
+				folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
+			elif filt == 'pub':
+				# Get all reports that have public access
+				public_list = Report.objects.filter(privacy=False)
+			elif filt == 'groups':
+				# Get all groups that current user is a member of
+				user_groups = current_user.groups.all()
+			elif filt == 'priv':
+				# Get all private reports that have been shared with current user by group association
+				shared_list = Report.objects.filter(groups__in=user_groups)
+			elif filt == 'down':
+				filename = request.POST['filename']
+				shared_list = Report.objects.filter(groups__in=user_groups)
+				public_list = Report.objects.filter(privacy=False)
+				if filename not in shared_list and filename not in public_list:
+					return HttpResponse("You do not have permission to access a file with this name.")

@@ -141,72 +141,75 @@ def list(request):
 	if request.method == 'POST':
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
-
-			#Plain Text Reader Instantiation
-			inputFile  = request.FILES['docfile']
-			inputFile.open('rb')
-			inputLines = inputFile.readlines()
-	
-			#Encrypted File Writer Instantiation
-			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
-			outwriter  = open(outputfilename, 'wb')
-
-		
-			#Crypto characteristic generation
-			key        = 'aaaaaaaaaaaaaaaa'
-#           RSAkey     = RSA.generate(2048)
-			iv         = 'bbbbbbbbbbbbbbbb'
-			encryptor  = AES.new(key, AES.MODE_CBC, iv)
-			filesize   = inputFile.size
-			
-			#Write basics
-			outwriter.write((struct.pack('<Q', filesize)))
-			outwriter.write(bytes(iv, 'utf-8'))
-			outwriter.write(key.encode('utf-8'))
-			#outwriter.write(RSA.exportKey('PEM'))
-			
-			#Need to sign the file
-			#cipher = PKCS1_v1_5.new(RSAkey)            
-#           msg = SHA256.new(RSAkey)
-			#signature = cipher.sign(RSAkey)
-			#outwriter.write(signature.encode('utf-8'))
-		
-			#Write the encrypted file
-			for line in inputLines:
-				if len(line) == 0:
-					break
-				elif len(line)%16 != 0:
-					line += (' ' * (16 - len(line)%16)).encode('utf-8')
-				outwriter.write(encryptor.encrypt(line))        
-
-			#Cannot save unless the file is open in read mode
-			outwriter.close()
-			outwriter = open(outputfilename, 'rb')
-			outputFile = File(outwriter)
-			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
-		
-			#Save the object to the database and close the open files
-			newdoc.author = current_user
-			newdoc.name = request.POST['name']  
+			docfile = request.FILES['docfile']
+			print(type(docfile))
+			newdoc = Document(author = request.user, name = request.POST['name'], docfile = docfile, encrypted = False)
 			newdoc.save()
-			outwriter.close()
-			inputFile.close()
-
-			# #Generate name for a signature file 
-			# signFileName = request.FILES['docfile'].name + '.pem'
-			
-			# #Write the signature file with the private key
-			# with open(signFileName, 'wb') as signer:
-			# 	#privKey = RSAkey
-			# 	#pubKey = privKey.publickey()
-			# 	#cipher = PKCS1_v1_5.new(privKey)
-			# 	#msg = SHA256.new(RSAkey)
-			# 	#signature = signer.sign(msg)
-			# 	signer.write(key.encode('utf-8'))
+# 			#Plain Text Reader Instantiation
+# 			inputFile  = request.FILES['docfile']
+# 			inputFile.open('rb')
+# 			inputLines = inputFile.readlines()
 	
-			#Save the object to the database and close the open files   
-			newdoc.save()
-			outwriter.close()
+# 			#Encrypted File Writer Instantiation
+# 			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
+# 			outwriter  = open(outputfilename, 'wb')
+
+		
+# 			#Crypto characteristic generation
+# 			key        = 'aaaaaaaaaaaaaaaa'
+# #           RSAkey     = RSA.generate(2048)
+# 			iv         = 'bbbbbbbbbbbbbbbb'
+# 			encryptor  = AES.new(key, AES.MODE_CBC, iv)
+# 			filesize   = inputFile.size
+			
+# 			#Write basics
+# 			outwriter.write((struct.pack('<Q', filesize)))
+# 			outwriter.write(bytes(iv, 'utf-8'))
+# 			outwriter.write(key.encode('utf-8'))
+# 			#outwriter.write(RSA.exportKey('PEM'))
+			
+# 			#Need to sign the file
+# 			#cipher = PKCS1_v1_5.new(RSAkey)            
+# #           msg = SHA256.new(RSAkey)
+# 			#signature = cipher.sign(RSAkey)
+# 			#outwriter.write(signature.encode('utf-8'))
+		
+# 			#Write the encrypted file
+# 			for line in inputLines:
+# 				if len(line) == 0:
+# 					break
+# 				elif len(line)%16 != 0:
+# 					line += (' ' * (16 - len(line)%16)).encode('utf-8')
+# 				outwriter.write(encryptor.encrypt(line))        
+
+# 			#Cannot save unless the file is open in read mode
+# 			outwriter.close()
+# 			outwriter = open(outputfilename, 'rb')
+# 			outputFile = File(outwriter)
+# 			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
+		
+# 			#Save the object to the database and close the open files
+# 			newdoc.author = current_user
+# 			newdoc.name = request.POST['name']  
+# 			newdoc.save()
+# 			outwriter.close()
+# 			inputFile.close()
+
+# 			# #Generate name for a signature file 
+# 			# signFileName = request.FILES['docfile'].name + '.pem'
+			
+# 			# #Write the signature file with the private key
+# 			# with open(signFileName, 'wb') as signer:
+# 			# 	#privKey = RSAkey
+# 			# 	#pubKey = privKey.publickey()
+# 			# 	#cipher = PKCS1_v1_5.new(privKey)
+# 			# 	#msg = SHA256.new(RSAkey)
+# 			# 	#signature = signer.sign(msg)
+# 			# 	signer.write(key.encode('utf-8'))
+	
+# 			#Save the object to the database and close the open files   
+# 			newdoc.save()
+# 			outwriter.close()
 		#   inputFile.close()
 
 

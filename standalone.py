@@ -72,10 +72,11 @@ if __name__ == "__main__":
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				print(r.content.decode('utf-8'))		
 
-			elif command == 'groups':
-				payload = {'filter': 'groups', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
-				r = client.post(cmdurl, data = payload, cookies = cookies)
-				print(r.content.decode('utf-8'))		
+			# elif command == 'groups':
+			# 	payload = {'filter': 'groups', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/'}
+			# 	r = client.post(cmdurl, data = payload, cookies = cookies)
+			# 	print(r.content.decode('utf-8'))		
+
 
 			elif command == "get":
 				reportname = input("What report would you like to access: ")
@@ -197,7 +198,18 @@ if __name__ == "__main__":
 						else:
 							print('Signature did not match, cannot decrypt the file for you. Please try again.')
 
-
+			elif command == 'help':
+				print(
+					'ls\n' +
+						'\t-pub:  Display all public reports\n' +
+						'\t-priv: Display all private reports\n' +
+						'\t-m:    Display all authored reports\n' +
+						'\t-a:    Display all shared reports\n' +
+						'\t-d:    Display all folders\n' +
+					'encrypt: Enter menu for encrypting file with AES and displaying key\n'
+					'decrypt: Enter menu for decrypting file with AES'
+					'exit: Exit the application'
+					)
 			elif command == "exit":
 				break
 	else:

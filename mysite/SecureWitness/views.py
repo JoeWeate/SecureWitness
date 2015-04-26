@@ -19,7 +19,6 @@ from django.template import RequestContext
 import datetime
 
 
-from SecureWitness.hybridencryption import encrypt_file
 from Crypto.PublicKey import RSA
 import os, random, struct
 from Crypto.Hash import SHA256

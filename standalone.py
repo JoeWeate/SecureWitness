@@ -25,8 +25,8 @@ cmdurl = 'http://127.0.0.1:8000/SecureWitness/execute/'
 if __name__ == "__main__":
 	
 	#Ask for login
-	username = 'ng4mf'#input("What is your username: ")
-	password = 'password'#input("What is your password: ")
+	username = input("What is your username: ")
+	password = input("What is your password: ")
 
 
 	client = requests.session()
@@ -34,7 +34,6 @@ if __name__ == "__main__":
 	r0 = client.get(loginurl)
 	cookies = dict(client.cookies)
 	token = client.cookies['csrftoken'] 
-	print(r0.cookies)
 
 	logindata = {'username': username, 'password': password, 'csrfmiddlewaretoken': token, 'next': '/'}
 	

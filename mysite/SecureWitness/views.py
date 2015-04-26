@@ -193,17 +193,17 @@ def list(request):
 			outwriter.close()
 			inputFile.close()
 
-			#Generate name for a signature file 
-			signFileName = request.FILES['docfile'].name + '.pem'
+			# #Generate name for a signature file 
+			# signFileName = request.FILES['docfile'].name + '.pem'
 			
-			#Write the signature file with the private key
-			with open(signFileName, 'wb') as signer:
-				#privKey = RSAkey
-				#pubKey = privKey.publickey()
-				#cipher = PKCS1_v1_5.new(privKey)
-				#msg = SHA256.new(RSAkey)
-				#signature = signer.sign(msg)
-				signer.write(key.encode('utf-8'))
+			# #Write the signature file with the private key
+			# with open(signFileName, 'wb') as signer:
+			# 	#privKey = RSAkey
+			# 	#pubKey = privKey.publickey()
+			# 	#cipher = PKCS1_v1_5.new(privKey)
+			# 	#msg = SHA256.new(RSAkey)
+			# 	#signature = signer.sign(msg)
+			# 	signer.write(key.encode('utf-8'))
 	
 			#Save the object to the database and close the open files   
 			newdoc.save()
@@ -212,13 +212,13 @@ def list(request):
 
 
 			#Reopen the signature file as a readable in order to push it to the database 
-			#####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
-			with open(signFileName, 'rb') as signer:
-				signedFile = File(signer)
-				signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
-				signatureFile.author = current_user
-				signatureFile.name = request.POST['name']
-				signatureFile.save()
+			# #####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
+			# with open(signFileName, 'rb') as signer:
+			# 	signedFile = File(signer)
+			# 	signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
+			# 	signatureFile.author = current_user
+			# 	signatureFile.name = request.POST['name']
+			# 	signatureFile.save()
 				
 	#       # Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))
@@ -656,6 +656,43 @@ def execute(request):
 					return HttpResponse("Files in this report: " + filearray)					
 
 				return HttpResponse("You do not have permission to access a report with this name.")
+
+			elif filt == 'download':
+				reportname = request.POST['report']
+				filename = request.POST['filename']
+
+				if filename != 'all':
+					rep = Report.objects.filter(short=str(reportname))
+					if len(rep) > 0:
+						rep = rep[0]
+						docs = rep.doc.all().filter(name=str(filename))
+						print(docs)
+						if len(docs) > 0:
+							docs = docs[0].docfile
+							docurl = docs.url
+							print(docurl)
+							return HttpResponse(docurl)
+				else:
+					rep = Report.objects.filter(short = str(reportname))
+
+					if len(rep) > 0:
+						rep = rep[0]
+						docs = rep.doc.all()
+						print(docs)
+						urllist = ''
+
+						for doc in docs:
+							tempdoc = doc.docfile
+							tempurl = tempdoc.url
+							urllist += ', ' + tempurl
+							print(urllist)
+
+						if len(urllist) > 0:
+							urllist = urllist[2:]
+						return HttpResponse(urllist)
+
+
+				return HttpResponse('Something went wrong in download process')
 
 			# elif filt == 'files':
 			# 	reportname = request.POST['report']

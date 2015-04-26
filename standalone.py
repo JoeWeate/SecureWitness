@@ -91,11 +91,28 @@ if __name__ == "__main__":
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				print(r.content.decode('utf-8'))	
 
-				# if r.content.decode('utf-8') == 'True':
-				# 	print('Files associated with this report are shown below')
-				# 	payload = {'filter': 'files', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
-				# 	r = client.post(cmdurl, data = payload, cookies = cookies)
-				# 	print(r.content.decode('utf-8'))
+				filename = input('What file would you like: ')
+				payload = {'filter': 'download', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname, 'filename': filename}
+				r = client.post(cmdurl, data = payload, cookies = cookies)
+				url = r.content.decode('utf-8').split(', ')
+				print(url)
+				downloadurls = []
+
+				for link in url:
+					downloadurls.append('http://127.0.0.1:8000' + link)
+
+				print(downloadurls)
+
+				saveloc = input("Enter location to save to with a backslash at the end: ")
+				for link in downloadurls:
+					
+					savename = saveloc + link.split('/')[-1]
+					r = client.get(link, stream=True)
+
+					with open(savename, 'wb') as downloader:
+						for chunk in r.iter_content(2048):
+							downloader.write(chunk)
+
 
 			elif command == "kill":
 				break

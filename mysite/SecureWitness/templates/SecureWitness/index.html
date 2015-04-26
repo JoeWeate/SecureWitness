@@ -27,20 +27,24 @@ My Reports:
     <input type="submit" name="submit" value="Edit Report" />
 </form>
 {% else %}
-    <p>No reports are available.</p>
+    <p><t/>No reports are available.</p>
 {% endif %}
+
+
 <br>
+
+
 My Folders:
 <br>
 {% if folder_list %}
     <ul>
     {% for folder in folder_list %}
-        <li><a href="/SecureWitness/folder/{{ folder.id }}/">{{ folder.name }}</a></li>
+        <li><a href="/SecureWitness/folder/{{ folder.id }}/">   {{ folder.name }}</a></li>
     {% endfor %}
 
     </ul>
 {% else %}
-    <p>No folders are available.</p>
+    <p>   No folders are available.</p>
 {% endif %}
 <br>
 Public reports:

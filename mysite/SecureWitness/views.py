@@ -694,27 +694,74 @@ def execute(request):
 
 				return HttpResponse('Something went wrong in download process')
 
-			# elif filt == 'files':
-			# 	reportname = request.POST['report']
-			# 	user_groups = current_user.groups.all()
-			# 	shared_list = Report.objects.filter(groups__in=user_groups)
-			# 	public_list = Report.objects.filter(privacy=False)
-			# 	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+			elif filt == 'disp':
+				filename = request.POST['report']
+				can_get = False
+				to_get = None
+				user_groups = current_user.groups.all()
+				shared_list = Report.objects.filter(groups__in=user_groups)
+				public_list = Report.objects.filter(privacy=False)
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 
-			# 	accessible_list = []
+				for rep in shared_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In shared list")
+				for rep in public_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In public list")
+				for rep in report_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In authored list")	
 
-			# 	for rep in shared_list:
-			# 		accessible_list.append(rep)
-			# 	for rep in public_list:
-			# 		if rep not in accessible_list:
-			# 			accessible_list.append(rep)
-			# 	for rep in report_list:
-			# 		if rep not in accessible_list:
-			# 			accessible_list.append(rep)				
+				if can_get:
+					retstr = ''
 
-			# 	for rep in accessible_list:
-			# 		if rep.short == reportname:
-			# 			print(rep.doc)
+					retstr += '\nTitle of Report:          ' + to_get.short
+					retstr += '\nPublication Date:         ' + str(to_get.pub_date)
+					retstr += '\nIncident Occurrence Date: ' + str(to_get.inc_date)
+					retstr += '\nLocation of Incident:     ' + to_get.location
+					retstr += '\nDescription of Incident:  ' + to_get.detailed
+					if to_get.privacy == True:
+						retstr += '\nPrivacy Setting:          Private'
+					else:	
+						retstr += '\nPrivacy Setting:          Public'
+					
+					glist = ''
+					for g in to_get.groups.all():
+						glist += ', ' + g
+
+					klist = ''
+					for k in to_get.keyword.all():
+						klist += ', ' + k
+
+					if len(glist) > 0:
+						glist = glist[2:]
+					if len(klist) > 0:
+						klist = klist[2:]
+					retstr += '\nAssociated Groups:        ' + glist
+					retstr += '\nKeywords of Report:       ' + klist
+
+
+					#Display files in report
+					temp = to_get.doc.all()
+					filearray = ''
+					for file1 in temp:
+						filearray = filearray + ', ' + file1.name
+					if len(filearray) > 0:
+						filearray = filearray[2:]
+						retstr += '\nFiles in report:          ' + filearray
+					else:
+						retstr += '\nFiles in report:          No files in this report'
+
+					return HttpResponse(retstr)
+				else:
+					return HttpResponse("You do not have permission to access a report with this name.")
 
 
 	

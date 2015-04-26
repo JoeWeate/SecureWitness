@@ -113,6 +113,15 @@ if __name__ == "__main__":
 						for chunk in r.iter_content(2048):
 							downloader.write(chunk)
 
+			elif command == "disp":
+				reportname = input('Enter report to display')
+				payload = {'filter': 'disp', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
+ 
+				r = client.post(cmdurl, data = payload, cookies = cookies)
+
+				
+				print(r.content.decode('utf-8'))
+
 
 			elif command == "kill":
 				break

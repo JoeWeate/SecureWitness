@@ -149,7 +149,7 @@ if __name__ == "__main__":
 						#Write the encrypted file
 						while True:
 							chunk = inputFile.read(64*1024)
-							print(chunk)
+							#print(chunk)
 							if len(chunk) == 0:
 								break
 							elif len(chunk)%16 != 0:
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 									if len(chunk) == 0:
 										break
 									chunk = decryptor.decrypt(chunk)
-									print(chunk)
+									#print(chunk)
 									output.write(chunk)
 					
 								output.truncate(origsize)

@@ -17,7 +17,7 @@ def encrypt_file(key, RSAkey, infile, outfile=None, chunksize=64*1024):
 		outfile = infile + ".enc"
 
 	iv = 'ffffddddccccbbbb'
-	#iv = ''.join(chr(random.randint(0,0xFF)) for i in range(16))
+	iv = ''.join(chr(random.randint(0,0xFF)) for i in range(16))
 	#print(len(iv))
 	#print(iv)
 	encryptor = AES.new(key, AES.MODE_CBC, iv)

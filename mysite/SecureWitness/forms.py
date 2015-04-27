@@ -76,6 +76,11 @@ class DeleteReportForm(forms.Form):
 		super(DeleteReportForm, self).__init__(*args, **kwargs)
 		self.fields['report'] = forms.IntegerField(initial=report_id, widget=forms.HiddenInput())
 
+class DeleteCommentForm(forms.Form):
+	def __init__(self, comments, *args, **kwargs):
+		super(DeleteCommentForm, self).__init__(*args, **kwargs)
+		self.fields['comment'] = forms.ChoiceField(choices = [ (c.id, str(c) + " - by " + str(c.author)) for c in comments])
+
 class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment

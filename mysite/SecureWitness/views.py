@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment, Keyword
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm, DeleteReportForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm, DeleteReportForm, DeleteCommentForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -296,9 +296,10 @@ def editReport(request):
 	delete_report_form = DeleteReportForm(report_id)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	delete_comment_form = DeleteCommentForm(comments)
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
-	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form, 'delete_comment_form': delete_comment_form}, context)
 
 @login_required
 def createKeyword(request):
@@ -363,13 +364,13 @@ def commentSuccess(request):
 		comment = comment_form.save()
 	return render(request, 'SecureWitness/success.html')
 
-def commentDelete(request, comment_id):
+def commentDelete(request):
 	try:
-		report = Comment.objects.get(pk=comment_id)
-		report.delete()
+		comment = Comment.objects.get(pk=request.POST['comment'])
+		comment.delete()
 	except Report.DoesNotExist:
 		raise Http404("Comment does not exist")
-	return render(request, '/SecureWitness/success.html')
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def deleteReport(request):

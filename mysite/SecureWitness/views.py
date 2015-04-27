@@ -147,90 +147,13 @@ def list(request):
 			print(type(docfile))
 			newdoc = Document(author = request.user, name = request.POST['name'], docfile = docfile, encrypted = False)
 			newdoc.save()
-# 			#Plain Text Reader Instantiation
-# 			inputFile  = request.FILES['docfile']
-# 			inputFile.open('rb')
-# 			inputLines = inputFile.readlines()
-	
-# 			#Encrypted File Writer Instantiation
-# 			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
-# 			outwriter  = open(outputfilename, 'wb')
-
-		
-# 			#Crypto characteristic generation
-# 			key        = 'aaaaaaaaaaaaaaaa'
-# #           RSAkey     = RSA.generate(2048)
-# 			iv         = 'bbbbbbbbbbbbbbbb'
-# 			encryptor  = AES.new(key, AES.MODE_CBC, iv)
-# 			filesize   = inputFile.size
-			
-# 			#Write basics
-# 			outwriter.write((struct.pack('<Q', filesize)))
-# 			outwriter.write(bytes(iv, 'utf-8'))
-# 			outwriter.write(key.encode('utf-8'))
-# 			#outwriter.write(RSA.exportKey('PEM'))
-			
-# 			#Need to sign the file
-# 			#cipher = PKCS1_v1_5.new(RSAkey)            
-# #           msg = SHA256.new(RSAkey)
-# 			#signature = cipher.sign(RSAkey)
-# 			#outwriter.write(signature.encode('utf-8'))
-		
-# 			#Write the encrypted file
-# 			for line in inputLines:
-# 				if len(line) == 0:
-# 					break
-# 				elif len(line)%16 != 0:
-# 					line += (' ' * (16 - len(line)%16)).encode('utf-8')
-# 				outwriter.write(encryptor.encrypt(line))        
-
-# 			#Cannot save unless the file is open in read mode
-# 			outwriter.close()
-# 			outwriter = open(outputfilename, 'rb')
-# 			outputFile = File(outwriter)
-# 			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
-		
-# 			#Save the object to the database and close the open files
-# 			newdoc.author = current_user
-# 			newdoc.name = request.POST['name']  
-# 			newdoc.save()
-# 			outwriter.close()
-# 			inputFile.close()
-
-# 			# #Generate name for a signature file 
-# 			# signFileName = request.FILES['docfile'].name + '.pem'
-			
-# 			# #Write the signature file with the private key
-# 			# with open(signFileName, 'wb') as signer:
-# 			# 	#privKey = RSAkey
-# 			# 	#pubKey = privKey.publickey()
-# 			# 	#cipher = PKCS1_v1_5.new(privKey)
-# 			# 	#msg = SHA256.new(RSAkey)
-# 			# 	#signature = signer.sign(msg)
-# 			# 	signer.write(key.encode('utf-8'))
-	
-# 			#Save the object to the database and close the open files   
-# 			newdoc.save()
-# 			outwriter.close()
-		#   inputFile.close()
-
-
-			#Reopen the signature file as a readable in order to push it to the database 
-			# #####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
-			# with open(signFileName, 'rb') as signer:
-			# 	signedFile = File(signer)
-			# 	signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
-			# 	signatureFile.author = current_user
-			# 	signatureFile.name = request.POST['name']
-			# 	signatureFile.save()
-				
 	#       # Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))
 	else:
 		form = DocumentForm() # A empty, unbound form
 
 	# Load documents for the list page
-	documents = Document.objects.all()
+	documents = Document.objects.filter(author=current_user)
 
 	# Render list page with the documents and the form
 	return render_to_response(
@@ -549,14 +472,11 @@ def login(request):
 			if user is not None:
 					if user.is_active:
 						auth_login(request, user)
-						return render_to_response('SecureWitness/execute.html', 
-								context)
+						return HttpResponse('Login Successful')
 					else:
-						return render_to_response('SecureWitness/login.html', 
-								context)
+						return HttpResponse('Login unsuccessful. You can still run encrypt and decrypt though.')
 			else:
-				return render_to_response('SecureWitness/login.html', 
-								context)
+				return HttpResponse('Login unsuccessful. You can still run encrypt and decrypt though.')
 	# elif request.method == 'GET':
 	# 	login_form = LoginForm()
 	# 	request.cookies['sessionid'] = request.session._get_or_create_session_key()

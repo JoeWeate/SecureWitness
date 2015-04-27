@@ -37,10 +37,11 @@ if __name__ == "__main__":
 
 	logindata = {'username': username, 'password': password, 'csrfmiddlewaretoken': token, 'next': '/'}
 	
-	r1 = client.post(loginurl, data = logindata, headers = dict(Referer=loginurl))
+	r1 = client.post(checkurl, data = logindata, headers = dict(Referer=checkurl))
+
+	print(r1.content.decode('utf-8'))
 
 	if r1.status_code == 200 and r1.content != 'Invalid Login Info'.encode('utf-8'):
-		print("Login successful!")
 		while(True):
 			r = client.get(cmdurl)
 			token = r.cookies['csrftoken']
@@ -139,12 +140,11 @@ if __name__ == "__main__":
 					iv         = Random.new().read(16)
 					encryptor  = AES.new(key, AES.MODE_CBC, iv)
 					filesize   = os.stat(filepath).st_size
-					print('Key is : ' + key)
 					with open(outputfilename, 'wb') as outwriter:
 						#Write basics
 						outwriter.write((struct.pack('<Q', filesize)))
 						outwriter.write(iv)
-						#outwriter.write(key.encode('utf-8'))
+						outwriter.write(key.encode('utf-8'))
 					
 						#Write the encrypted file
 						while True:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 				sigfile  = input('Absolute file path to local signature file: ')
 				outfile  = input('Absolute file path with file name to save as: ')
 				#saveloc  = 'C:\\Users\\n3\\Downloads\\'#input('Absolute file path to save location (including ending backslash): ')
-				checkkey = input('Key: ')
+				#checkkey = input('Key: ')
 				#print(sigfile.split('\\','.')[-3])
 
 				with open(sigfile, 'rb') as verifier:
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 					with open(filename, 'rb') as inp:
 						origsize = struct.unpack('<Q', inp.read(struct.calcsize('Q')))[0]
 						iv = inp.read(16)#.decode('utf-8')
-						#checkkey = inp.read(len(key)).decode('utf-8')
+						checkkey = inp.read(len(key)).decode('utf-8')
 						#print(key + '    ' + checkkey)
 						if key == checkkey:
 
@@ -205,8 +205,9 @@ if __name__ == "__main__":
 						'\t-m:    Display all authored reports\n' +
 						'\t-a:    Display all shared reports\n' +
 						'\t-d:    Display all folders\n' +
-					'encrypt: Enter menu for encrypting file with AES and displaying key\n'
-					'decrypt: Enter menu for decrypting file with AES'
+					'encrypt: Enter process for encrypting file with AES and displaying key\n'
+					'decrypt: Enter process for decrypting file with AES\n'
+					'get:     Enter process for obtaining file from server'
 					'exit: Exit the application'
 					)
 			elif command == "exit":

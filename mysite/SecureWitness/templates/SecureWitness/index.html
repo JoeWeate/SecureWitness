@@ -18,7 +18,7 @@
 </form>
 
 
-My Reports:
+<h4>My Reports:</h4>
 {% if report_list %}
     <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
     {% csrf_token %}
@@ -30,10 +30,7 @@ My Reports:
     <p><t/>No reports are available.</p>
 {% endif %}
 
-
-
-
-My Folders:
+<h4>My Folders:</h4>
 <br>
 {% if folder_list %}
     <ul>
@@ -45,8 +42,8 @@ My Folders:
 {% else %}
     <p>   No folders are available.</p>
 {% endif %}
-<br>
-Public reports:
+
+<h4>Public reports:</h4>
 <form id="public_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ public_reports_form.as_p }}
@@ -54,7 +51,7 @@ Public reports:
     <input type="submit" name="submit" value="View selected Report" />
 </form>
 <br>
-Reports shared with me (public and private):
+<h4>Reports shared with me (public and private):</h4>
 <form id="shared_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ shared_reports_form.as_p }}
@@ -77,9 +74,8 @@ Reports shared with me (public and private):
 <br>
 <br>
 {% if current_user|has_group:"admins" %}
-Admin functions:
-<br>
-All Reports:
+<h3>Admin functions:</h3>
+<h4>All Reports:</h4>
 <form id="all_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ all_reports_form.as_p }}

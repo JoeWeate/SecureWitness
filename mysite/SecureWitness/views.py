@@ -297,7 +297,7 @@ def editReport(request):
 		report = Report.objects.get(pk=report_id)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
-	else: 
+	else:
 		edit_form = EditForm(current_user, instance=report)
 	delete_report_form = DeleteReportForm(report_id)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
@@ -389,24 +389,25 @@ def deleteReport(request):
 	return HttpResponseRedirect('/SecureWitness/')
 
 @login_required
-def folder(request,folder_id):
+def folder(request):
+	folder_id = request.POST['folder']
 	try:
 		folder = Folder.objects.get(id=folder_id)
-	except Report.DoesNotExist:
-		raise Http404("Report does not exist")
-	report_list = folder.reports.all
+	except Folder.DoesNotExist:
+		raise Http404("Folder does not exist")
+	report_list = folder.reports.all()
 	context = RequestContext(request)
 	current_user = request.user
-	if request.POST:
-		folder_form = FolderForm(current_user,request.POST, instance=folder)
-		if folder_form.is_valid():
-			folder_form.save()
-			return render_to_response('SecureWitness/success.html')
-	else:
-		folder_form = FolderForm(current_user,instance=folder)
+
+	folder_form = FolderForm(current_user,instance=folder)
 	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
-
+@login_required
+def folderSuccess(request):
+	folder_form = FolderForm(current_user, data = request.POST)
+	if folder_form.is_valid():
+		folder_form.save()
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def createFolder(request):

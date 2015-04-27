@@ -276,7 +276,8 @@ def createSuccess(request):
 	current_user = request.user
 	documents = Document.objects.filter(author=current_user)
 	report_form = ReportForm(documents, data = request.POST)
-	report = report_form.save()
+	if report_form.is_valid():
+		report = report_form.save()
 	return render(request, 'SecureWitness/success.html')
 
 
@@ -284,7 +285,8 @@ def createSuccess(request):
 def commentSuccess(request):
 	context = RequestContext(request)
 	comment_form = CommentForm(data=request.POST)
-	comment = comment_form.save()
+	if comment_form.is_valid():
+		comment = comment_form.save()
 	return render(request, 'SecureWitness/success.html')
 
 def commentDelete(request, comment_id):

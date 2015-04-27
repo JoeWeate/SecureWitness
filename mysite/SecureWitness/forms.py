@@ -104,7 +104,7 @@ class EditForm(forms.ModelForm):
 	class Meta:
 		model = Report
 		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups', 'keyword')
-		widgets = {'author':forms.HiddenInput()}
+		widgets = {'author':forms.HiddenInput(), 'detailed': forms.Textarea()}
 
 class FolderForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):

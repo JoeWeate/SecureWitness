@@ -39,5 +39,6 @@ urlpatterns = patterns('',
     url(r'^viewReport/$', views.viewReport, name='viewReport'),
     url(r'^search2/$',views.search2, name='search2'),
     url(r'^execute/$',views.execute, name='execute'),
-    url(r'^keyword/$',views.addkeyword, name='addkeyword')
+    url(r'^keyword/$',views.addkeyword, name='addkeyword'),
+    url(r'^adddoc/$',views.adddoc, name='adddocument')
 )

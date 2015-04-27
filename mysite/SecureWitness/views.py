@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
+from SecureWitness.models import Report, Document, Folder, UserProfile, Comment, Keyword
 
 from django.contrib.auth.models import User, Group, Permission
 from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, KeywordForm, SearchForm
@@ -159,7 +159,7 @@ def list(request):
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
 			docfile = request.FILES['docfile']
-			print(type(docfile))
+			#print(type(docfile))
 			newdoc = Document(author = request.user, name = request.POST['name'], docfile = docfile, encrypted = False)
 			newdoc.save()
 	#       # Redirect to the document list after POST
@@ -294,45 +294,94 @@ def editReport(request):
 	current_user = request.user
 	context = RequestContext(request)
 	if request.POST:
-		rid = request.POST['rid']
-		report = Report.objects.get(pk=rid)
-		edit_form = EditForm(current_user, request.POST, instance=report)
+		report_id = request.POST['rid']
+		report = Report.objects.get(pk=report_id)
+		edit_form = EditForm(current_user, report, request.POST, instance=report)
+
 		if edit_form.is_valid():
 			edit_form.save()
-			return render_to_response('SecureWitness/success.html')
-	
-	try:
-		report_id = request.GET['report']
-		report = Report.objects.get(pk=report_id)
-	except Report.DoesNotExist:
-		raise Http404("Report does not exist")
-	context = RequestContext(request)
-	edit_form = EditForm(current_user,instance=report)
+	else:
+		try:
+			report_id = request.GET['report']
+			report = Report.objects.get(pk=report_id)
+			edit_form = EditForm(current_user, report, instance=report)
+			#print(report.keyword.all())
+		except Report.DoesNotExist:
+			raise Http404("Report does not exist")
 	author = request.user
-	keywords = report.keyword.all()
 
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'author': author, 'reportid': report_id, 'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'keyword': keywords, 'group_form': group_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id': report_id, 'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
 
 @login_required
 def addkeyword(request):
 	context = RequestContext(request)
+	current_user = request.user
 	if request.method == 'POST':
-		report_id = request.POST['reportid']
+		report_id = request.POST['rid']
 		try:
 			report = Report.objects.get(pk=report_id)
+			report.save()
+			newkey = Keyword(word=request.POST['newkey'])
+			newkey.save()
+			report.keyword.add(newkey)
+			report.save()
+
+
+			edit_form = EditForm(current_user, report, request.POST, instance=report)
+			author = request.user
 			keywords = report.keyword.all()
+
+			comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+			comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+			shared_groups = report.groups.all()
+			group_form = GroupForm()
 		except Report.DoesNotExist:
 			raise Http404("Report does not exist")
-		keyform = KeywordForm()
+		
 	else:
 		keyform = KeywordForm()
 
-	return redirect('SecureWitness/editReport.html')
+	return render(request, 'SecureWitness/success.html')
+
+@login_required
+def adddoc(request):
+	context = RequestContext(request)
+	current_user = request.user
+	if request.method == 'POST':
+		report_id = request.POST['rid']
+		try:
+			report = Report.objects.get(pk=report_id)
+			report.save()
+
+			docfile = request.FILES['newdoc']
+			docname = request.POST['name']
+			newdoc = Document(author = request.user, name = docname, docfile = docfile, encrypted = False)
+			newdoc.save()
+
+			report.doc.add(newdoc)
+			report.save()
+
+
+			edit_form = EditForm(current_user, report, request.POST, instance=report)
+			author = request.user
+			keywords = report.keyword.all()
+
+			comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+			comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+			shared_groups = report.groups.all()
+			group_form = GroupForm()
+		except Report.DoesNotExist:
+			raise Http404("Report does not exist")
+		
+	else:
+		keyform = KeywordForm()
+
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def success(request):

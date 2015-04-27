@@ -29,6 +29,9 @@ class UserProfile(models.Model):
 class Keyword(models.Model):
 	word = models.CharField(max_length=200)
 
+	def __str__(self):
+		return self.word
+
 class Report(models.Model):
 	# User who created report
 	author = models.ForeignKey(User)

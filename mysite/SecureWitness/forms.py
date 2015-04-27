@@ -69,7 +69,7 @@ class ReportForm(forms.ModelForm):
 	class Meta:
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location', 'keyword')
-		widgets = {'author':forms.HiddenInput()}
+		widgets = {'author':forms.HiddenInput(), 'detailed':forms.Textarea()}
 
 class DeleteReportForm(forms.Form):
 	def __init__(self, report_id, *args, **kwargs):

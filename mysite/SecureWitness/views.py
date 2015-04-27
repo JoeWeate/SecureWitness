@@ -462,6 +462,7 @@ def addAdmin(request):
 def suspendUser(request):
 	context = RequestContext(request)
 	current_user = request.user
+	members = User.objects.filter(is_active=True)
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		user.is_active = False

@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     url(r'^createSuccess/$', views.createSuccess, name='createSuccess'),
     url(r'^success/$', views.success, name='success'),
     url(r'^list/$', views.list, name='list'),
-    url(r'^delete/(?P<report_id>\d+)/$', views.delete, name='delete'),
+    url(r'^deleteReport/$', views.deleteReport, name='deleteReport'),
     url(r'^folderDelete/(?P<folder_id>\d+)/$', views.folderDelete, name='folderDelete'),
     url(r'^groupCreate/$', views.groupCreate, name='groupCreate'),
     url(r'^groupSuccess/$', views.groupSuccess, name='groupSuccess'),
@@ -39,5 +39,5 @@ urlpatterns = patterns('',
     url(r'^viewReport/$', views.viewReport, name='viewReport'),
     url(r'^search2/$',views.search2, name='search2'),
     url(r'^execute/$',views.execute, name='execute'),
-    url(r'^keyword/$',views.addkeyword, name='addkeyword')
+    url(r'^createKeyword/$', views.createKeyword, name='createKeyword')
 )

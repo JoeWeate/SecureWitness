@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
+from SecureWitness.models import Report, Document, Folder, UserProfile, Comment, Keyword
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, KeywordForm, SearchForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm, DeleteReportForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -55,27 +55,10 @@ def index(request):
 	# Generate a form to view a selected shared report
 	shared_reports_form = SelectReportForm(shared_list)
 	search_form = SearchForm()
+	all_reports = Report.objects.all()
+	all_reports_form = SelectReportForm(all_reports)
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
-		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
-		
-	current_user = request.user
-	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
-	edit_report_form = SelectReportForm(report_list)
-	folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
-	# Get all reports that have public access
-	public_list = Report.objects.filter(privacy=False)
-	# Get all groups that current user is a member of
-	user_groups = current_user.groups.all()
-	# Get all private reports that have been shared with current user by group association
-	shared_list = Report.objects.filter(groups__in=user_groups)
-	# Generate a form to view a selected public report
-	public_reports_form = SelectReportForm(public_list)
-	# Generate a form to view a selected shared report
-	shared_reports_form = SelectReportForm(shared_list)
-	all_report = Report.objects.order_by('-pub_date')
-	all_reports_form = SelectReportForm(all_report)
-	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
-		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form,'all_reports_form':all_reports_form,'all_report':all_report})
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form, 'all_reports_form': all_reports_form})
 
 def register(request):
 	# Like before, get the request's context.
@@ -284,8 +267,9 @@ def viewReport(request):
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	delete_report_form = DeleteReportForm(report_id)
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
-	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments}, context)
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments, 'delete_report_form': delete_report_form}, context)
 
 
 # View for an author to edit a selected report's fields
@@ -306,33 +290,29 @@ def editReport(request):
 		report = Report.objects.get(pk=report_id)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
-	context = RequestContext(request)
-	edit_form = EditForm(current_user,instance=report)
-	author = request.user
-	keywords = report.keyword.all()
-
+	else: 
+		edit_form = EditForm(current_user, instance=report)
+	delete_report_form = DeleteReportForm(report_id)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
-
-	return render_to_response('SecureWitness/editReport.html', {'author': author, 'reportid': report_id, 'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'keyword': keywords, 'group_form': group_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
 
 @login_required
-def addkeyword(request):
+def createKeyword(request):
+	current_user = request.user
 	context = RequestContext(request)
-	if request.method == 'POST':
-		report_id = request.POST['reportid']
-		try:
-			report = Report.objects.get(pk=report_id)
-			keywords = report.keyword.all()
-		except Report.DoesNotExist:
-			raise Http404("Report does not exist")
-		keyform = KeywordForm()
+	success = False
+	if request.POST:
+		keyword_form = KeywordForm(data=request.POST)
+		if keyword_form.is_valid():
+			keyword_form.save()
+			success = True
 	else:
-		keyform = KeywordForm()
-
-	return redirect('SecureWitness/editReport.html')
+		keyword_form = KeywordForm()
+	keywords = Keyword.objects.all()
+	return render_to_response('SecureWitness/createKeyword.html', {'keyword_form': keyword_form, 'current_user': current_user, 'keywords': keywords, 'success': success}, context)
 
 @login_required
 def success(request):
@@ -391,8 +371,9 @@ def commentDelete(request, comment_id):
 	return render(request, '/SecureWitness/success.html')
 
 @login_required
-def delete(request,report_id):
+def deleteReport(request):
 	try:
+		report_id = int(request.POST['report'])
 		report = Report.objects.get(pk=report_id)
 		report.delete()
 	except Report.DoesNotExist:
@@ -470,13 +451,10 @@ def addAdmin(request):
 def suspendUser(request):
 	context = RequestContext(request)
 	current_user = request.user
-	suspended, created = Group.objects.get_or_create(name="suspended")
-	members = suspended.user_set.all()
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		user.is_active = False
 		user.save()
-		suspended.user_set.add(user)
 	add_user_form = AddUserForm()
 	return render_to_response('SecureWitness/suspendUser.html', {'current_user': current_user, 'add_user_form': add_user_form, 'members': members}, context)
 
@@ -484,13 +462,11 @@ def suspendUser(request):
 def reactivateUser(request):
 	context = RequestContext(request)
 	current_user = request.user
-	suspended, created = Group.objects.get_or_create(name="suspended")
-	members = suspended.user_set.all()
+	members = User.objects.filter(is_active=False)
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		user.is_active = True
 		user.save()
-		suspended.user_set.remove(user)
 	reactivate_user_form = ReactivateUserForm(members)
 	return render_to_response('SecureWitness/reactivateUser.html', {'current_user': current_user, 'reactivate_user_form': reactivate_user_form, 'members': members}, context)
 
@@ -584,35 +560,35 @@ def search(request):
 						available.remove(r)
 			results = available
 		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query}, context)
-    # if 'q' in request.GET and request.GET['q']:
-    #     q = request.GET['q']
-    #     reports= Report.objects.filter(short__icontains=q)  #initializes reports
-    #     for words in q.split():
-    #         r1 = Report.objects.filter(short__icontains=words)
-    #         r2 = Report.objects.filter(location__icontains=words)
-    #         # r4 = Report.objects.filter(keyword__word__icontains=q)
-    #         reports = reports | (r1 | r2)
-    #     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-    #     reports = reports & r3
-    #     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    # else:
-    #     reports= Report.objects.filter(privacy=False)
-    #     # if user is admin reports= Report.objects.all
-    # return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+	# if 'q' in request.GET and request.GET['q']:
+	#     q = request.GET['q']
+	#     reports= Report.objects.filter(short__icontains=q)  #initializes reports
+	#     for words in q.split():
+	#         r1 = Report.objects.filter(short__icontains=words)
+	#         r2 = Report.objects.filter(location__icontains=words)
+	#         # r4 = Report.objects.filter(keyword__word__icontains=q)
+	#         reports = reports | (r1 | r2)
+	#     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
+	#     reports = reports & r3
+	#     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+	# else:
+	#     reports= Report.objects.filter(privacy=False)
+	#     # if user is admin reports= Report.objects.all
+	# return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 def search2(request):
-    if 'q' in request.GET and request.GET['q']:
-        q = request.GET['q']
-        reports= Report.objects.filter(privacy=False)
-        for words in q.split():
-            r1 = Report.objects.filter(short__icontains=words)
-            r2 = Report.objects.filter(location__icontains=words)
-            reports = reports & (r1 | r2)
+	if 'q' in request.GET and request.GET['q']:
+		q = request.GET['q']
+		reports= Report.objects.filter(privacy=False)
+		for words in q.split():
+			r1 = Report.objects.filter(short__icontains=words)
+			r2 = Report.objects.filter(location__icontains=words)
+			reports = reports & (r1 | r2)
 
-        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    else:
-        reports=Report.objects.filter(privacy=False)
-        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+		return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+	else:
+		reports=Report.objects.filter(privacy=False)
+		return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 
 #The following methods are ONLY for the command line interface

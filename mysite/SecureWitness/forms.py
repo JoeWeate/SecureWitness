@@ -103,9 +103,6 @@ class EditForm(forms.ModelForm):
 		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups', 'keyword')
 		widgets = {'author':forms.HiddenInput()}
 
-class KeywordForm(forms.Form):
-	newword = forms.CharField(label = 'New Keyword')
-
 class FolderForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):
 		super(FolderForm, self).__init__(*args, **kwargs)

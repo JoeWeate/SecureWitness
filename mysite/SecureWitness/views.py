@@ -17,7 +17,7 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 import datetime
-
+from django.views.decorators.csrf import csrf_exempt
 
 from Crypto.PublicKey import RSA
 import os, random, struct
@@ -40,6 +40,7 @@ import json
 
 @login_required
 def index(request):
+<<<<<<< HEAD
 	current_user = request.user
 	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 	edit_report_form = SelectReportForm(report_list)
@@ -57,6 +58,29 @@ def index(request):
 	search_form = SearchForm()
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
+=======
+	if not request.user.is_authenticated():
+		return redirect('/accounts/login/')
+	else:
+		current_user = request.user
+		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+		edit_report_form = SelectReportForm(report_list)
+		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
+		# Get all reports that have public access
+		public_list = Report.objects.filter(privacy=False)
+		# Get all groups that current user is a member of
+		user_groups = current_user.groups.all()
+		# Get all private reports that have been shared with current user by group association
+		shared_list = Report.objects.filter(groups__in=user_groups)
+		# Generate a form to view a selected public report
+		public_reports_form = SelectReportForm(public_list)
+		# Generate a form to view a selected shared report
+		shared_reports_form = SelectReportForm(shared_list)
+		all_report = Report.objects.order_by('-pub_date')
+		all_reports_form = SelectReportForm(all_report)
+	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form,'all_reports_form':all_reports_form,'all_report':all_report})
+>>>>>>> 1067735ee048c7fb42e96a378613ab497b3899de
 
 def register(request):
 	# Like before, get the request's context.
@@ -226,8 +250,34 @@ def groupSuccess(request):
 		current_user.groups.add(group)
 	else:
 		print(group_form.errors)
-	return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
+	return render_to_response('SecureWitness/success.html', {'group': group}, context)
 
+@login_required
+def addUser(request):
+	current_user = request.user
+	group = Group.objects.all()
+	user = User.objects.all()
+	return render_to_response('SecureWitness/addUser.html',{'group':group, 'user':user,'current_user':current_user})
+
+@login_required
+@csrf_exempt
+def addUserSuccess(request):
+	group_id = request.POST.get('group')
+	user_id = request.POST.get('user')
+	group = Group.objects.get(id=group_id)
+	user = User.objects.get(id=user_id)
+	group.user_set.add(user)
+	return render_to_response('SecureWitness/success.html')
+
+@login_required
+@csrf_exempt
+def removeUserSuccess(request):
+	group_id = request.POST.get('group2')
+	user_id = request.POST.get('user2')
+	group = Group.objects.get(id=group_id)
+	user = User.objects.get(id=user_id)
+	group.user_set.remove(user)
+	return render_to_response('SecureWitness/success.html')
 # View displaying a report that user has access to
 @login_required
 def viewReport(request):
@@ -269,6 +319,15 @@ def create(request):
 	return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
 @login_required
+def create1(request):
+	context = RequestContext(request)
+	current_user = request.user
+	# documents = Document.objects.filter(author=current_user)
+	report_form = ReportForm(current_user, initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+	return render_to_response('SecureWitness/create1.html', {'report_form':report_form}, context)
+
+
+@login_required
 def createSuccess(request):
 	context = RequestContext(request)
 	current_user = request.user
@@ -276,7 +335,10 @@ def createSuccess(request):
 	report_form = ReportForm(documents, data = request.POST)
 	if report_form.is_valid():
 		report = report_form.save()
-	return render(request, 'SecureWitness/success.html')
+		return render(request, 'SecureWitness/success.html')
+	else:
+		return HttpResponseRedirect('/SecureWitness/create1')
+	
 
 
 
@@ -293,7 +355,7 @@ def commentDelete(request, comment_id):
 		report.delete()
 	except Report.DoesNotExist:
 		raise Http404("Comment does not exist")
-	return render(request, 'SecureWitness/success.html')
+	return render(request, '/SecureWitness/success.html')
 
 @login_required
 def delete(request,report_id):
@@ -302,7 +364,7 @@ def delete(request,report_id):
 		report.delete()
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
-	return render(request, 'SecureWitness/success.html')
+	return HttpResponseRedirect('/SecureWitness/')
 
 @login_required
 def folder(request,folder_id):

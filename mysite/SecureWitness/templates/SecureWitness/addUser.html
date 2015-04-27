@@ -1,0 +1,42 @@
+{% load securewitness_extras %}
+{% if current_user|has_group:"admins" %}
+
+<h2>Add/Remove User to/from a Group</h2>
+<form id="addUser" method="post" action="/SecureWitness/addUserSuccess/">
+		{% csrf_token%}
+		Add
+		<select name="user">
+			{% for u in user %}
+				<option value = {{u.id}}>{{u.username}}</option>
+			{% endfor %}
+		</select>
+		To
+		<select name="group">
+			{% for g in group %}
+				<option value = {{g.id}}>{{g.name}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" name="submit" value="Add" />
+</form>
+
+<form id="addUser" method="post" action="/SecureWitness/removeUserSuccess/">
+		{% csrf_token%}
+		Remove
+		<select name="user2">
+			{% for u in user %}
+				<option value = {{u.id}}>{{u.username}}</option>
+			{% endfor %}
+		</select>
+		From
+		<select name="group2">
+			{% for g in group %}
+				<option value = {{g.id}}>{{g.name}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" name="submit" value="Remove" />
+</form>
+{% else %}
+	<p>You need to be an admin to create a group<p>
+{% endif %}
+
+<a href="/SecureWitness/">Home</a>	

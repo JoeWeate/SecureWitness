@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<p>Your username and password didn't match or your account is suspended! Please try again or contact the admin.</p>
 {% endif %}
 Login Here:
 <form method="post" action="{% url 'django.contrib.auth.views.login' %}">

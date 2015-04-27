@@ -12,7 +12,7 @@
 
 <h4>My Reports:</h4>
 {% if report_list %}
-    <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
+    <form id="edit_report_form" method="get" action="/SecureWitness/editReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ edit_report_form.as_p }}
 

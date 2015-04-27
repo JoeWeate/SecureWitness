@@ -268,23 +268,44 @@ def viewReport(request):
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments}, context)
 
+
 # View for an author to edit a selected report's fields
 @login_required
 def editReport(request):
 	current_user = request.user
-	report_id = request.POST['report']
+	context = RequestContext(request)
+	if request.POST:
+		rid = request.POST['rid']
+		report = Report.objects.get(pk=rid)
+		edit_form = EditForm(current_user, request.POST, instance=report)
+		if edit_form.is_valid():
+			edit_form.save()
+			return render_to_response('SecureWitness/success.html')
+	
 	try:
+		report_id = request.GET['report']
 		report = Report.objects.get(pk=report_id)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
-	context = RequestContext(request)
-	edit_form = EditForm(current_user,instance=report)
+	else: 
+		edit_form = EditForm(current_user, instance=report)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
+
+
+
+@login_required
+def success(request):
+	current_user = request.user
+	if request.POST:
+		edit_form = EditForm(current_user, request.POST)
+	if edit_form.is_valid():
+		edit_form.save()
+	return render(request, 'SecureWitness/success.html')
 
 @login_required
 def create(request):
@@ -360,14 +381,7 @@ def folder(request,folder_id):
 		folder_form = FolderForm(current_user,instance=folder)
 	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
-@login_required
-def success(request):
-	current_user = request.user
-	if request.POST:
-		edit_form = EditForm(current_user, data = request.POST)
-	if edit_form.is_valid():
-		edit_form.save()
-	return render(request, 'SecureWitness/success.html')
+
 
 @login_required
 def createFolder(request):

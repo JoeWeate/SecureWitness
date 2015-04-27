@@ -1,3 +1,6 @@
+{% load securewitness_extras %}
+{% if current_user|has_group:"admins" %}
+
 <h2>Add/Remove User to/from a Group</h2>
 <form id="addUser" method="post" action="/SecureWitness/addUserSuccess/">
 		{% csrf_token%}
@@ -32,4 +35,8 @@
 		</select>
 		<input type="submit" name="submit" value="Remove" />
 </form>
+{% else %}
+	<p>You need to be an admin to create a group<p>
+{% endif %}
 
+<a href="/SecureWitness/">Home</a>	

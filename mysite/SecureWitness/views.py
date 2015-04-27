@@ -234,9 +234,10 @@ def groupSuccess(request):
 
 @login_required
 def addUser(request):
+	current_user = request.user
 	group = Group.objects.all()
 	user = User.objects.all()
-	return render_to_response('SecureWitness/addUser.html',{'group':group, 'user':user})
+	return render_to_response('SecureWitness/addUser.html',{'group':group, 'user':user,'current_user':current_user})
 
 @login_required
 @csrf_exempt

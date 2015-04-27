@@ -7,7 +7,9 @@
 		<input type="submit" name="submit" value="Edit Report" />
 </form>
 
-<form action='/SecureWitness/delete/{{report.id}}'>
+<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	{{ delete_report_form.as_p }}
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
 <a href="/SecureWitness/createKeyword">Create new keyword</a>

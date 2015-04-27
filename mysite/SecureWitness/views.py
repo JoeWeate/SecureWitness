@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment, Keyword
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm, DeleteReportForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -265,8 +265,9 @@ def viewReport(request):
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
+	delete_report_form = DeleteReportForm(report_id)
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
-	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments}, context)
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments, 'delete_report_form': delete_report_form}, context)
 
 
 # View for an author to edit a selected report's fields
@@ -289,12 +290,12 @@ def editReport(request):
 		raise Http404("Report does not exist")
 	else: 
 		edit_form = EditForm(current_user, instance=report)
+	delete_report_form = DeleteReportForm(report_id)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
-
-	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
 
 @login_required
 def createKeyword(request):
@@ -368,8 +369,9 @@ def commentDelete(request, comment_id):
 	return render(request, '/SecureWitness/success.html')
 
 @login_required
-def delete(request,report_id):
+def deleteReport(request):
 	try:
+		report_id = int(request.POST['report'])
 		report = Report.objects.get(pk=report_id)
 		report.delete()
 	except Report.DoesNotExist:

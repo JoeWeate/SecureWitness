@@ -71,10 +71,11 @@ class ReportForm(forms.ModelForm):
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location', 'keyword')
 		widgets = {'author':forms.HiddenInput()}
 
-class DeleteReportForm(forms.ModelForm):
-	class Meta:
-		model = Report
-		fields = {}
+class DeleteReportForm(forms.Form):
+	def __init__(self, report_id, *args, **kwargs):
+		super(DeleteReportForm, self).__init__(*args, **kwargs)
+		self.fields['report'] = forms.IntegerField(initial=report_id, widget=forms.HiddenInput())
+
 
 class CommentForm(forms.ModelForm):
 	class Meta:

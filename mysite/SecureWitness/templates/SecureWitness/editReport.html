@@ -63,13 +63,11 @@
     <input type="submit" value="Add File" >
 </form>
 
-<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
-	{% csrf_token %}
-	{{ delete_report_form.as_p }}
+<form action='/SecureWitness/delete/{{report.id}}'>
+	{% csrf_token%}	
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
 
-<a href="/SecureWitness/createKeyword">Create new keyword</a>
 
 <h2>Comments:</h2>
 {% for comment in comments %}

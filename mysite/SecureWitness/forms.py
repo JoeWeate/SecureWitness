@@ -62,31 +62,21 @@ class ReportForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):
 		super(ReportForm, self).__init__(*args, **kwargs)
 		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
-		self.fields['doc'].help_text = ' * <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + str(self.fields['doc'].help_text)
-		self.fields['keyword'].help_text = ' * <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + str(self.fields['keyword'].help_text)
-		self.fields['location'].help_text = ' * '
-		self.fields['inc_date'].help_text = ' * '
 	class Meta:
 		model = Report
-		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location', 'keyword')
-		widgets = {'author':forms.HiddenInput()}
+		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
+		widgets = {'author':forms.HiddenInput(),'inc_date':forms.HiddenInput()}
 
-class DeleteReportForm(forms.Form):
-	def __init__(self, report_id, *args, **kwargs):
-		super(DeleteReportForm, self).__init__(*args, **kwargs)
-		self.fields['report'] = forms.IntegerField(initial=report_id, widget=forms.HiddenInput())
-
+class DeleteReportForm(forms.ModelForm):
+	class Meta:
+		model = Report
+		fields = {}
 
 class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment
 		fields = ('content','report','author')
 		widgets = {'author':forms.HiddenInput(),'report':forms.HiddenInput()}
-
-class KeywordForm(forms.ModelForm):
-	class Meta:
-		model = Keyword
-		fields = ('word',)
 
 class SelectReportForm(forms.Form):
 	def __init__(self, reports, *args, **kwargs):

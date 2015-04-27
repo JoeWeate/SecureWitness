@@ -31,12 +31,7 @@ No comments yet!
 </form>
 
 {% if current_user|has_group:"admins" %}
-Admin functionality:
-<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
-	{% csrf_token %}
-	{{ delete_report_form.as_p }}
+<form action='/SecureWitness/delete/{{report.id}}'>
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
 {% endif %}
-
-<a href="/SecureWitness/">Home</a>

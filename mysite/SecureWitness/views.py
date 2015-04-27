@@ -323,13 +323,15 @@ def addkeyword(request):
 			comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 			shared_groups = report.groups.all()
 			group_form = GroupForm()
+			delete_report_form = DeleteReportForm(report_id)
 		except Report.DoesNotExist:
 			raise Http404("Report does not exist")
 		
 	else:
 		keyform = KeywordForm()
 
-	return render(request, 'SecureWitness/success.html')
+	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
+
 
 @login_required
 def adddoc(request):
@@ -353,6 +355,8 @@ def adddoc(request):
 			edit_form = EditForm(current_user, report, request.POST, instance=report)
 			author = request.user
 			keywords = report.keyword.all()
+			
+			delete_report_form = DeleteReportForm(report_id)
 
 			comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 			comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
@@ -364,7 +368,7 @@ def adddoc(request):
 	else:
 		keyform = KeywordForm()
 
-	return render(request, 'SecureWitness/success.html')
+	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
 
 @login_required
 def createKeyword(request):

@@ -298,7 +298,7 @@ def editReport(request):
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
-	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
 
 @login_required
 def addkeyword(request):

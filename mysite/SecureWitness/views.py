@@ -55,10 +55,8 @@ def index(request):
 	# Generate a form to view a selected shared report
 	shared_reports_form = SelectReportForm(shared_list)
 	search_form = SearchForm()
-	all_reports = Report.objects.all()
-	all_reports_form = SelectReportForm(all_reports)
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
-		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form, 'all_reports_form': all_reports_form})
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
 
 def register(request):
 	# Like before, get the request's context.

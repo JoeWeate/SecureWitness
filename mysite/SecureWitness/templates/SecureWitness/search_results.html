@@ -3,12 +3,12 @@ You searched for "{{ query }}" and the results are listed below.
 
 {% if results %}
     <p> Found {{ results|length }} report{{ results|pluralize }}</p>
-    <ul>
-        {% for result in results %}
-        <li>{{ result.author }}'s :  {{ result.short }} </li>
+    <form id="select_report_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ select_report_form.as_p }}
 
-        {% endfor %}
-    </ul>
+    <input type="submit" name="submit" value="View Report" />
+	</form>
 {% else %}
     <p> There are no reports found with that query.</p>
 

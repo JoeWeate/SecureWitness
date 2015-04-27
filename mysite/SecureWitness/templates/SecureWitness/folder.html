@@ -1,3 +1,4 @@
+{% if folder.owner == current_user %}
 <h2>Folder: {{folder.name}}</h2>
 
 {% if report_list %}
@@ -24,5 +25,8 @@
 <form action='/SecureWitness/folderDelete/{{folder_id}}'>
     <input type="submit" value="Delete Folder" onclick="return confirm('Are you sure to delete this folder?')">
 </form>
+{% else %}
+You don't have access to the folder!
+{% endif %}
 <br>
 <a href="/SecureWitness/">Home</a>

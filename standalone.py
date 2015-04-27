@@ -16,10 +16,10 @@ import os
 from base64 import b64encode as encode
 from base64 import b64decode as decode
 
-checkurl = 'http://127.0.0.1:8000/SecureWitness/login/'
-loginurl = 'http://127.0.0.1:8000/accounts/login/'
+checkurl = 'http://ancient-beach-5770.herokuapp.com/SecureWitness/login/'
+loginurl = 'http://ancient-beach-5770.herokuapp.com/accounts/login/'
 
-cmdurl = 'http://127.0.0.1:8000/SecureWitness/execute/'
+cmdurl = 'http://ancient-beach-5770.herokuapp.com/SecureWitness/execute/'
 
 
 if __name__ == "__main__":
@@ -39,7 +39,11 @@ if __name__ == "__main__":
 	
 	r1 = client.post(checkurl, data = logindata, headers = dict(Referer=checkurl))
 
-	print(r1.content.decode('utf-8'))
+	if r1.content.decode('utf-8') == "Login Successful":
+		print(r1.content.decode('utf-8'))
+	else:
+		print('Not logged in. Can still run encryption and decryption')
+
 
 	if r1.status_code == 200 and r1.content != 'Invalid Login Info'.encode('utf-8'):
 		while(True):
@@ -83,6 +87,7 @@ if __name__ == "__main__":
 				payload = {'filter': 'haveaccess', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				print(r.content.decode('utf-8'))	
+				if r.content.decode('')
 
 				filename = input('What file would you like: ')
 				payload = {'filter': 'download', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname, 'filename': filename}
@@ -92,7 +97,7 @@ if __name__ == "__main__":
 				downloadurls = []
 
 				for link in url:
-					downloadurls.append('http://127.0.0.1:8000' + link)
+					downloadurls.append('http://ancient-beach-5770.herokuapp.com' + link)
 
 				print(downloadurls)
 

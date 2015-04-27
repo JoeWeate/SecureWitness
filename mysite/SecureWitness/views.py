@@ -101,7 +101,7 @@ def register(request):
 			# Send email with activation key
 			email_subject = 'Account confirmation'
 			email_body = "Hey %s, thanks for signing up. To activate your account, click this link within \
-			48hours http://127.0.0.1:8000/SecureWitness/confirm/%s" % (username, activation_key)
+			48hours http://ancient-beach-5770.herokuapp.com/SecureWitness/confirm/%s" % (username, activation_key)
 
 			send_mail(email_subject, email_body, 'ianzheng3240@gmail.com',
 				[email], fail_silently=False)
@@ -353,7 +353,7 @@ def createSuccess(request):
 	context = RequestContext(request)
 	current_user = request.user
 	documents = Document.objects.filter(author=current_user)
-	report_form = ReportForm(documents, data = request.POST)
+	report_form = ReportForm(current_user, data = request.POST)
 	if report_form.is_valid():
 		report = report_form.save()
 		return render(request, 'SecureWitness/success.html')
@@ -404,7 +404,7 @@ def folder(request,folder_id):
 			return render_to_response('SecureWitness/success.html')
 	else:
 		folder_form = FolderForm(current_user,instance=folder)
-	return render_to_response('SecureWitness/folder.html',{'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
+	return render_to_response('SecureWitness/folder.html',{'current_user':current_user,'folder':folder,'report_list':report_list,'folder_form':folder_form, 'folder_id':folder_id},context)
 
 
 
@@ -425,8 +425,11 @@ def folderSuccess(request):
 
 @login_required
 def folderDelete(request,folder_id):
+	current_user = request.user
 	try:
 		folder = Folder.objects.get(pk=folder_id)
+		if folder.owner != current_user:
+			return HttpResponse('You do not have access to the folder')
 		folder.delete()
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
@@ -572,7 +575,8 @@ def search(request):
 						break
 				if not_found == False:
 					results.append(r)
-		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query}, context)
+		select_report_form = SelectReportForm(results)
+		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query,'select_report_form':select_report_form}, context)
 
 def search2(request):
 	if 'q' in request.GET and request.GET['q']:

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report,Folder, Document, Comment
+from SecureWitness.models import Report,Folder, Document, Comment, Keyword
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -67,16 +67,21 @@ class ReportForm(forms.ModelForm):
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
 		widgets = {'author':forms.HiddenInput(),'inc_date':forms.HiddenInput()}
 
-class DeleteReportForm(forms.ModelForm):
-	class Meta:
-		model = Report
-		fields = {}
+class DeleteReportForm(forms.Form):
+	def __init__(self, report_id, *args, **kwargs):
+		super(DeleteReportForm, self).__init__(*args, **kwargs)
+		self.fields['report'] = forms.IntegerField(initial=report_id, widget=forms.HiddenInput())
 
 class CommentForm(forms.ModelForm):
 	class Meta:
 		model = Comment
 		fields = ('content','report','author')
 		widgets = {'author':forms.HiddenInput(),'report':forms.HiddenInput()}
+
+class KeywordForm(forms.ModelForm):
+	class Meta:
+		model = Keyword
+		fields = ('word',)
 
 class SelectReportForm(forms.Form):
 	def __init__(self, reports, *args, **kwargs):
@@ -91,9 +96,6 @@ class EditForm(forms.ModelForm):
 		model = Report
 		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups', 'keyword')
 		widgets = {'author':forms.HiddenInput()}
-
-class KeywordForm(forms.Form):
-	newword = forms.CharField(label = 'New Keyword')
 
 class FolderForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):

@@ -7,18 +7,18 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, CommentForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.contrib.auth import login
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import authenticate
 
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 import datetime
 
 
-from SecureWitness.hybridencryption import encrypt_file
 from Crypto.PublicKey import RSA
 import os, random, struct
 from Crypto.Hash import SHA256
@@ -33,6 +33,11 @@ from django.core.files import File
 from django.core.mail import send_mail
 import hashlib, datetime, random
 from django.utils import timezone
+
+from django.views.decorators.csrf import csrf_exempt
+
+import json
+
 @login_required
 def index(request):
 	if not request.user.is_authenticated():
@@ -54,7 +59,6 @@ def index(request):
 		shared_reports_form = SelectReportForm(shared_list)
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form})
-
 
 def register(request):
 	# Like before, get the request's context.
@@ -137,83 +141,86 @@ def list(request):
 	if request.method == 'POST':
 		form = DocumentForm(request.POST, request.FILES)
 		if form.is_valid():
-
-			#Plain Text Reader Instantiation
-			inputFile  = request.FILES['docfile']
-			inputFile.open('rb')
-			inputLines = inputFile.readlines()
-	
-			#Encrypted File Writer Instantiation
-			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
-			outwriter  = open(outputfilename, 'wb')
-
-		
-			#Crypto characteristic generation
-			key        = 'aaaaaaaaaaaaaaaa'
-#           RSAkey     = RSA.generate(2048)
-			iv         = 'bbbbbbbbbbbbbbbb'
-			encryptor  = AES.new(key, AES.MODE_CBC, iv)
-			filesize   = inputFile.size
-			
-			#Write basics
-			outwriter.write((struct.pack('<Q', filesize)))
-			outwriter.write(bytes(iv, 'utf-8'))
-			outwriter.write(key.encode('utf-8'))
-			#outwriter.write(RSA.exportKey('PEM'))
-			
-			#Need to sign the file
-			#cipher = PKCS1_v1_5.new(RSAkey)            
-#           msg = SHA256.new(RSAkey)
-			#signature = cipher.sign(RSAkey)
-			#outwriter.write(signature.encode('utf-8'))
-		
-			#Write the encrypted file
-			for line in inputLines:
-				if len(line) == 0:
-					break
-				elif len(line)%16 != 0:
-					line += (' ' * (16 - len(line)%16)).encode('utf-8')
-				outwriter.write(encryptor.encrypt(line))        
-
-			#Cannot save unless the file is open in read mode
-			outwriter.close()
-			outwriter = open(outputfilename, 'rb')
-			outputFile = File(outwriter)
-			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
-		
-			#Save the object to the database and close the open files
-			newdoc.author = current_user
-			newdoc.name = request.POST['name']  
+			docfile = request.FILES['docfile']
+			print(type(docfile))
+			newdoc = Document(author = request.user, name = request.POST['name'], docfile = docfile, encrypted = False)
 			newdoc.save()
-			outwriter.close()
-			inputFile.close()
-
-			#Generate name for a signature file 
-			signFileName = request.FILES['docfile'].name + '.pem'
-			
-			#Write the signature file with the private key
-			with open(signFileName, 'wb') as signer:
-				#privKey = RSAkey
-				#pubKey = privKey.publickey()
-				#cipher = PKCS1_v1_5.new(privKey)
-				#msg = SHA256.new(RSAkey)
-				#signature = signer.sign(msg)
-				signer.write(key.encode('utf-8'))
+# 			#Plain Text Reader Instantiation
+# 			inputFile  = request.FILES['docfile']
+# 			inputFile.open('rb')
+# 			inputLines = inputFile.readlines()
 	
-			#Save the object to the database and close the open files   
-			newdoc.save()
-			outwriter.close()
+# 			#Encrypted File Writer Instantiation
+# 			outputfilename = 'SecureWitness/' + inputFile.name + '.enc'
+# 			outwriter  = open(outputfilename, 'wb')
+
+		
+# 			#Crypto characteristic generation
+# 			key        = 'aaaaaaaaaaaaaaaa'
+# #           RSAkey     = RSA.generate(2048)
+# 			iv         = 'bbbbbbbbbbbbbbbb'
+# 			encryptor  = AES.new(key, AES.MODE_CBC, iv)
+# 			filesize   = inputFile.size
+			
+# 			#Write basics
+# 			outwriter.write((struct.pack('<Q', filesize)))
+# 			outwriter.write(bytes(iv, 'utf-8'))
+# 			outwriter.write(key.encode('utf-8'))
+# 			#outwriter.write(RSA.exportKey('PEM'))
+			
+# 			#Need to sign the file
+# 			#cipher = PKCS1_v1_5.new(RSAkey)            
+# #           msg = SHA256.new(RSAkey)
+# 			#signature = cipher.sign(RSAkey)
+# 			#outwriter.write(signature.encode('utf-8'))
+		
+# 			#Write the encrypted file
+# 			for line in inputLines:
+# 				if len(line) == 0:
+# 					break
+# 				elif len(line)%16 != 0:
+# 					line += (' ' * (16 - len(line)%16)).encode('utf-8')
+# 				outwriter.write(encryptor.encrypt(line))        
+
+# 			#Cannot save unless the file is open in read mode
+# 			outwriter.close()
+# 			outwriter = open(outputfilename, 'rb')
+# 			outputFile = File(outwriter)
+# 			newdoc = Document(docfile = outputFile, encrypted = True, sign = False)
+		
+# 			#Save the object to the database and close the open files
+# 			newdoc.author = current_user
+# 			newdoc.name = request.POST['name']  
+# 			newdoc.save()
+# 			outwriter.close()
+# 			inputFile.close()
+
+# 			# #Generate name for a signature file 
+# 			# signFileName = request.FILES['docfile'].name + '.pem'
+			
+# 			# #Write the signature file with the private key
+# 			# with open(signFileName, 'wb') as signer:
+# 			# 	#privKey = RSAkey
+# 			# 	#pubKey = privKey.publickey()
+# 			# 	#cipher = PKCS1_v1_5.new(privKey)
+# 			# 	#msg = SHA256.new(RSAkey)
+# 			# 	#signature = signer.sign(msg)
+# 			# 	signer.write(key.encode('utf-8'))
+	
+# 			#Save the object to the database and close the open files   
+# 			newdoc.save()
+# 			outwriter.close()
 		#   inputFile.close()
 
 
 			#Reopen the signature file as a readable in order to push it to the database 
-			#####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
-			with open(signFileName, 'rb') as signer:
-				signedFile = File(signer)
-				signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
-				signatureFile.author = current_user
-				signatureFile.name = request.POST['name']
-				signatureFile.save()
+			# #####LIKELY we want to change this to not allow uploading of the signature file to the same place as the encrypted file, as that would be a security hole I think
+			# with open(signFileName, 'rb') as signer:
+			# 	signedFile = File(signer)
+			# 	signatureFile = Document(docfile=signedFile, encrypted=True, sign = True)
+			# 	signatureFile.author = current_user
+			# 	signatureFile.name = request.POST['name']
+			# 	signatureFile.save()
 				
 	#       # Redirect to the document list after POST
 			return HttpResponseRedirect(reverse('SecureWitness.views.list'))
@@ -278,13 +285,14 @@ def groupView(request, group_id):
 		group = Group.objects.get(pk=group_id)
 		group_members = group.user_set.all()
 		reports = Report.objects.filter(groups=group)
+		reports_form = SelectReportForm(reports)
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		group.user_set.add(user)
 	add_user_form = AddUserForm()
-	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports': reports, 'add_user_form': add_user_form}, context)
+	return render_to_response('SecureWitness/groupView.html', {'current_user': current_user, 'group': group, 'group_members': group_members, 'reports_form': reports_form, 'add_user_form': add_user_form}, context)
 
 # View displayed after succesfully creating a new group
 @login_required
@@ -326,8 +334,10 @@ def editReport(request):
 	edit_form = EditForm(current_user,instance=report)
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
+	shared_groups = report.groups.all()
+	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments':comments}, context)
+	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
 
 @login_required
 def create(request):
@@ -479,15 +489,284 @@ def reactivateUser(request):
 def search(request):
     if 'q' in request.GET and request.GET['q']:
         q = request.GET['q']
-        r1 = Report.objects.filter(short__icontains=q)
-        r2 = Report.objects.filter(location__icontains=q)
-        r3 = Report.objects.filter(detailed__icontains=q)
-        # r4 = Report.objects.filter(keyword__word__icontains=q)
+        reports= Report.objects.filter(short__icontains=q)  #initializes reports
+        for words in q.split():
+            r1 = Report.objects.filter(short__icontains=words)
+            r2 = Report.objects.filter(location__icontains=words)
+            # r4 = Report.objects.filter(keyword__word__icontains=q)
+            reports = reports | (r1 | r2)
         r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-        reports = (r1 | r2) & r3
+        reports = reports & r3
         return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
     else:
-        reports= Report.objects.all
-        q=""
-        return render(request, 'SecureWitness/search_results2.html', {'reports': reports, 'query': q})
+        reports= Report.objects.filter(privacy=False)
+        # if user is admin reports= Report.objects.all
+        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
+def search2(request):
+    if 'q' in request.GET and request.GET['q']:
+        q = request.GET['q']
+        reports= Report.objects.filter(privacy=False)
+        for words in q.split():
+            r1 = Report.objects.filter(short__icontains=words)
+            r2 = Report.objects.filter(location__icontains=words)
+            reports = reports & (r1 | r2)
+
+        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+    else:
+        reports=Report.objects.filter(privacy=False)
+        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+
+
+#The following methods are ONLY for the command line interface
+
+def login(request):
+	context = RequestContext(request)
+
+	if request.method == 'POST':
+		
+		login_form = LoginForm(data=request.POST)
+		if login_form.is_valid():
+			username = request.POST['username']
+			password = request.POST['password']
+
+			user = authenticate(username=username, password=password)
+			#print(user)
+			if user is not None:
+					if user.is_active:
+						auth_login(request, user)
+						return render_to_response('SecureWitness/execute.html', 
+								context)
+					else:
+						return render_to_response('SecureWitness/login.html', 
+								context)
+			else:
+				return render_to_response('SecureWitness/login.html', 
+								context)
+	# elif request.method == 'GET':
+	# 	login_form = LoginForm()
+	# 	request.cookies['sessionid'] = request.session._get_or_create_session_key()
+	# 	return render('SecureWitness/login.html')
+	else:
+		login_form = LoginForm()
+
+
+	return render_to_response('SecureWitness/login.html', 
+								context)
+
+
+def execute(request):
+
+	context = RequestContext(request)
+	if request.method == 'POST':
+		filt = request.POST['filter']
+		print(filt)
+		if not request.user.is_authenticated():
+			print('Not authed')
+			return HttpResponse("You are not an authenticated user. You cannot view files.")
+		else:
+			current_user = request.user
+			print(filt)
+			if filt == 'dirs':
+				folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
+				folder_str = ''
+				for folder in folder_list:
+					folder_str = folder_str + ', ' + folder.name
+				if len(folder_str) > 0:
+					folder_str = folder_str[2:]
+				elif len(folder_str) <= 2:
+					folder_str = '**You have no folders currently**'
+				print(folder_str)
+				return HttpResponse(folder_str)	
+
+			elif filt == 'authored':
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+				#print(type(report_list[0].short))
+				rep_str = ''
+				for rep in report_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)		
+
+			elif filt == 'pub':
+				# Get all reports that have public access
+				public_list = Report.objects.filter(privacy=False)
+				print(public_list)
+				rep_str = ''
+				for rep in public_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)	
+
+			elif filt == 'groups':
+				# Get all groups that current user is a member of
+				user_groups = request.user.groups.all()			
+				print(type(user_groups))	
+
+			elif filt == 'priv':
+				# Get all private reports that have been shared with current user by group association
+				user_groups = current_user.groups.all()
+				shared_list = Report.objects.filter(groups__in=user_groups)
+				print(shared_list)
+				rep_str = ''
+				for rep in shared_list:
+					rep_str = rep_str + ', ' + rep.short
+				if len(rep_str) > 0:
+					rep_str = rep_str[2:]
+				elif len(rep_str) <= 2:
+					rep_str = '**You have no files currently**'
+				return HttpResponse(rep_str)	
+
+			elif filt == 'haveaccess':
+				filename = request.POST['report']
+				can_get = False
+				to_get = None
+				user_groups = current_user.groups.all()
+				shared_list = Report.objects.filter(groups__in=user_groups)
+				public_list = Report.objects.filter(privacy=False)
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+
+				for rep in shared_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In shared list")
+				for rep in public_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In public list")
+				for rep in report_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In authored list")	
+
+				if can_get:
+					temp = to_get.doc.all()
+					filearray = ''
+					for file1 in temp:
+						filearray = filearray + ', ' + file1.name
+					if len(filearray) > 0:
+						filearray = filearray[2:]
+					# if len(temp) > 0:
+					# 	print(temp)
+					return HttpResponse("Files in this report: " + filearray)					
+
+				return HttpResponse("You do not have permission to access a report with this name.")
+
+			elif filt == 'download':
+				reportname = request.POST['report']
+				filename = request.POST['filename']
+
+				if filename != 'all':
+					rep = Report.objects.filter(short=str(reportname))
+					if len(rep) > 0:
+						rep = rep[0]
+						docs = rep.doc.all().filter(name=str(filename))
+						print(docs)
+						if len(docs) > 0:
+							docs = docs[0].docfile
+							docurl = docs.url
+							print(docurl)
+							return HttpResponse(docurl)
+				else:
+					rep = Report.objects.filter(short = str(reportname))
+
+					if len(rep) > 0:
+						rep = rep[0]
+						docs = rep.doc.all()
+						print(docs)
+						urllist = ''
+
+						for doc in docs:
+							tempdoc = doc.docfile
+							tempurl = tempdoc.url
+							urllist += ', ' + tempurl
+							print(urllist)
+
+						if len(urllist) > 0:
+							urllist = urllist[2:]
+						return HttpResponse(urllist)
+
+
+				return HttpResponse('Something went wrong in download process')
+
+			elif filt == 'disp':
+				filename = request.POST['report']
+				can_get = False
+				to_get = None
+				user_groups = current_user.groups.all()
+				shared_list = Report.objects.filter(groups__in=user_groups)
+				public_list = Report.objects.filter(privacy=False)
+				report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+
+				for rep in shared_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In shared list")
+				for rep in public_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In public list")
+				for rep in report_list:
+					if rep.short == str(filename):
+						can_get = True
+						to_get = rep
+						print("In authored list")	
+
+				if can_get:
+					retstr = ''
+
+					retstr += '\nTitle of Report:          ' + to_get.short
+					retstr += '\nPublication Date:         ' + str(to_get.pub_date)
+					retstr += '\nIncident Occurrence Date: ' + str(to_get.inc_date)
+					retstr += '\nLocation of Incident:     ' + to_get.location
+					retstr += '\nDescription of Incident:  ' + to_get.detailed
+					if to_get.privacy == True:
+						retstr += '\nPrivacy Setting:          Private'
+					else:	
+						retstr += '\nPrivacy Setting:          Public'
+					
+					glist = ''
+					for g in to_get.groups.all():
+						glist += ', ' + g
+
+					klist = ''
+					for k in to_get.keyword.all():
+						klist += ', ' + k
+
+					if len(glist) > 0:
+						glist = glist[2:]
+					if len(klist) > 0:
+						klist = klist[2:]
+					retstr += '\nAssociated Groups:        ' + glist
+					retstr += '\nKeywords of Report:       ' + klist
+
+
+					#Display files in report
+					temp = to_get.doc.all()
+					filearray = ''
+					for file1 in temp:
+						filearray = filearray + ', ' + file1.name
+					if len(filearray) > 0:
+						filearray = filearray[2:]
+						retstr += '\nFiles in report:          ' + filearray
+					else:
+						retstr += '\nFiles in report:          No files in this report'
+
+					return HttpResponse(retstr)
+				else:
+					return HttpResponse("You do not have permission to access a report with this name.")
+
+
+	
+	return render_to_response('SecureWitness/execute.html', context)

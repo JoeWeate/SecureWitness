@@ -27,7 +27,9 @@ class UserForm(forms.ModelForm):
 
 		return user
 
-
+class LoginForm(forms.Form):
+	username = forms.CharField(label = 'Username: ')
+	password = forms.CharField(label = 'Password: ', widget = forms.PasswordInput())
 
 class AddUserForm(forms.Form):
 	def __init__(self, *args, **kwargs):
@@ -82,7 +84,7 @@ class EditForm(forms.ModelForm):
 		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
 	class Meta:
 		model = Report
-		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location')
+		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups')
 		widgets = {'author':forms.HiddenInput()}
 
 class FolderForm(forms.ModelForm):

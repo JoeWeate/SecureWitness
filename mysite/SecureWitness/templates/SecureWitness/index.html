@@ -7,10 +7,15 @@
 <form method="get" action="/SecureWitness/search/">
     {% csrf_token %}
 {#<label for="id_q">Search:</label>#}
-           <input type="text" name="q" />
+           <input placeholder="OR" type="text" name="q" />
            <input type="submit" value="Search"/>
         </form>
 
+<form method="get" action="/SecureWitness/search2/">
+    {% csrf_token %}
+           <input placeholder="AND" type="text" name="q" />
+           <input type="submit" value="Search"/>
+</form>
 
 
 My Reports:
@@ -22,20 +27,24 @@ My Reports:
     <input type="submit" name="submit" value="Edit Report" />
 </form>
 {% else %}
-    <p>No reports are available.</p>
+    <p><t/>No reports are available.</p>
 {% endif %}
+
+
 <br>
+
+
 My Folders:
 <br>
 {% if folder_list %}
     <ul>
     {% for folder in folder_list %}
-        <li><a href="/SecureWitness/folder/{{ folder.id }}/">{{ folder.name }}</a></li>
+        <li><a href="/SecureWitness/folder/{{ folder.id }}/">   {{ folder.name }}</a></li>
     {% endfor %}
 
     </ul>
 {% else %}
-    <p>No folders are available.</p>
+    <p>   No folders are available.</p>
 {% endif %}
 <br>
 Public reports:
@@ -64,6 +73,8 @@ Reports shared with me (public and private):
 <a href="createFolder">Create Folder</a>
 <br>
 <a href="groupList">My groups</a>
+<br>
+<a href="list">Add a file</a>
 <br>
 <br>
 {% if current_user|has_group:"admins" %}

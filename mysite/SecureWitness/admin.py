@@ -1,5 +1,5 @@
 from django.contrib import admin
-from SecureWitness.models import Report, Folder, Keyword, Document,UserProfile,Comment
+from SecureWitness.models import Report, Folder, Keyword, Document,UserProfile, Comment
 # Register your models here.
 admin.site.register(Report)
 admin.site.register(Folder)

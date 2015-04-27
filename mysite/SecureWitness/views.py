@@ -17,7 +17,7 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 import datetime
-
+from django.views.decorators.csrf import csrf_exempt
 
 from Crypto.PublicKey import RSA
 import os, random, struct
@@ -230,8 +230,33 @@ def groupSuccess(request):
 		current_user.groups.add(group)
 	else:
 		print(group_form.errors)
-	return render_to_response('SecureWitness/groupSuccess.html', {'group': group}, context)
+	return render_to_response('SecureWitness/success.html', {'group': group}, context)
 
+@login_required
+def addUser(request):
+	group = Group.objects.all()
+	user = User.objects.all()
+	return render_to_response('SecureWitness/addUser.html',{'group':group, 'user':user})
+
+@login_required
+@csrf_exempt
+def addUserSuccess(request):
+	group_id = request.POST.get('group')
+	user_id = request.POST.get('user')
+	group = Group.objects.get(id=group_id)
+	user = User.objects.get(id=user_id)
+	group.user_set.add(user)
+	return render_to_response('SecureWitness/success.html')
+
+@login_required
+@csrf_exempt
+def removeUserSuccess(request):
+	group_id = request.POST.get('group2')
+	user_id = request.POST.get('user2')
+	group = Group.objects.get(id=group_id)
+	user = User.objects.get(id=user_id)
+	group.user_set.remove(user)
+	return render_to_response('SecureWitness/success.html')
 # View displaying a report that user has access to
 @login_required
 def viewReport(request):

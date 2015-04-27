@@ -40,7 +40,6 @@ import json
 
 @login_required
 def index(request):
-<<<<<<< HEAD
 	current_user = request.user
 	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 	edit_report_form = SelectReportForm(report_list)
@@ -58,9 +57,6 @@ def index(request):
 	search_form = SearchForm()
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
-=======
-	if not request.user.is_authenticated():
-		return redirect('/accounts/login/')
 	else:
 		current_user = request.user
 		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')

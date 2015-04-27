@@ -2,25 +2,11 @@
 
 <h2>Welcome {{current_user.username}}!</h2>
 <br>
-
+<h4>Search reports:</h4>
 <form id="search_form" method="post" action="/SecureWitness/search/">
     {% csrf_token %}
     {{ search_form.as_p }}
     <input type="submit" value="Search"/>
-</form>
-
-
-<form method="get" action="/SecureWitness/search/">
-    {% csrf_token %}
-{#<label for="id_q">Search:</label>#}
-           <input placeholder="OR" type="text" name="q" />
-           <input type="submit" value="Search"/>
-        </form>
-
-<form method="get" action="/SecureWitness/search2/">
-    {% csrf_token %}
-           <input placeholder="AND" type="text" name="q" />
-           <input type="submit" value="Search"/>
 </form>
 
 
@@ -63,11 +49,6 @@
 
     <input type="submit" name="submit" value="View selected Report" />
 </form>
-
-
-{% for folder in folder_list %}
-    	<li>{{folder.name}}</li>
-{% endfor %}
 
 <a href="create">Create Report</a>
 <br>

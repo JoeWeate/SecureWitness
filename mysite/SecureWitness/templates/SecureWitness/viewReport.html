@@ -25,7 +25,7 @@ This report has no associated documents
 <h2>Comments:</h2>
 {% if comments %}
 {% for comment in comments %}
-<li>{{comment}} -by {{comment.author}} at {{comment.pub_date}} <a href = '/SecureWitness/commentDelete/{{comment.id}}'>Delete</a></li>
+<li>{{comment}} - by {{comment.author}} at {{comment.pub_date}} </li>
 <br>
 {% endfor %}
 {% else %}

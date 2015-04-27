@@ -86,30 +86,51 @@ if __name__ == "__main__":
 				reportname = input("What report would you like to access: ")
 				payload = {'filter': 'haveaccess', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
-				print(r.content.decode('utf-8'))	
-				if r.content.decode('')
+				
+				content = r.content.decode('utf-8')
+				if content == 'Files in this report: ':
+					print('No report or report has no files to download')
+					continue
+				if content.split(' ')[0] != 'Files':
+					print('Invalid report name.')
+					continue
+				#print(content)
 
-				filename = input('What file would you like: ')
+				filename = input('What file would you like (all downloads all files in report): ')
 				payload = {'filter': 'download', 'csrfmiddlewaretoken': token, 'next': '/SecureWitness/execute/', 'report': reportname, 'filename': filename}
 				r = client.post(cmdurl, data = payload, cookies = cookies)
 				url = r.content.decode('utf-8').split(', ')
-				print(url)
-				downloadurls = []
+				
+				if url[0] == 'Something went wrong in download process':
+					print('Invalid file name.')
+					continue
 
+				if len(url) == 0:
+					print('No files in this report.')
+					continue
+
+				downloadurls = []
 				for link in url:
 					downloadurls.append('http://ancient-beach-5770.herokuapp.com' + link)
 
-				print(downloadurls)
+				#print(downloadurls)
 
 				saveloc = input("Enter location to save to with a backslash at the end: ")
-				for link in downloadurls:
-					
-					savename = saveloc + link.split('/')[-1]
-					r = client.get(link, stream=True)
+				if not os.path.exists(saveloc):
+					print('Invalid location.')
+					continue
+				try:	
+					for link in downloadurls:
+						
+						savename = saveloc + link.split('/')[-1]
+						r = client.get(link, stream=True)
 
-					with open(savename, 'wb') as downloader:
-						for chunk in r.iter_content(2048):
-							downloader.write(chunk)
+						with open(savename, 'wb') as downloader:
+							for chunk in r.iter_content(2048):
+								downloader.write(chunk)
+				except:
+					print('Something went wrong. Probably improper path.')
+					
 
 			elif command == "disp":
 				reportname = input('Enter report to display: ')
@@ -212,7 +233,8 @@ if __name__ == "__main__":
 						'\t-d:    Display all folders\n' +
 					'encrypt: Enter process for encrypting file with AES and displaying key\n'
 					'decrypt: Enter process for decrypting file with AES\n'
-					'get:     Enter process for obtaining file from server'
+					'get:     Enter process for obtaining file from server\n'
+					'disp:    Enter process for displaying report\n'
 					'exit: Exit the application'
 					)
 			elif command == "exit":

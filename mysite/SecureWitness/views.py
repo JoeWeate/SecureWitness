@@ -40,7 +40,6 @@ import json
 
 @login_required
 def index(request):
-<<<<<<< HEAD
 	current_user = request.user
 	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
 	edit_report_form = SelectReportForm(report_list)
@@ -58,29 +57,6 @@ def index(request):
 	search_form = SearchForm()
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
-=======
-	if not request.user.is_authenticated():
-		return redirect('/accounts/login/')
-	else:
-		current_user = request.user
-		report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
-		edit_report_form = SelectReportForm(report_list)
-		folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
-		# Get all reports that have public access
-		public_list = Report.objects.filter(privacy=False)
-		# Get all groups that current user is a member of
-		user_groups = current_user.groups.all()
-		# Get all private reports that have been shared with current user by group association
-		shared_list = Report.objects.filter(groups__in=user_groups)
-		# Generate a form to view a selected public report
-		public_reports_form = SelectReportForm(public_list)
-		# Generate a form to view a selected shared report
-		shared_reports_form = SelectReportForm(shared_list)
-		all_report = Report.objects.order_by('-pub_date')
-		all_reports_form = SelectReportForm(all_report)
-	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
-		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form,'all_reports_form':all_reports_form,'all_report':all_report})
->>>>>>> 1067735ee048c7fb42e96a378613ab497b3899de
 
 def register(request):
 	# Like before, get the request's context.
@@ -558,35 +534,35 @@ def search(request):
 						available.remove(r)
 			results = available
 		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query}, context)
-    # if 'q' in request.GET and request.GET['q']:
-    #     q = request.GET['q']
-    #     reports= Report.objects.filter(short__icontains=q)  #initializes reports
-    #     for words in q.split():
-    #         r1 = Report.objects.filter(short__icontains=words)
-    #         r2 = Report.objects.filter(location__icontains=words)
-    #         # r4 = Report.objects.filter(keyword__word__icontains=q)
-    #         reports = reports | (r1 | r2)
-    #     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-    #     reports = reports & r3
-    #     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    # else:
-    #     reports= Report.objects.filter(privacy=False)
-    #     # if user is admin reports= Report.objects.all
-    # return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+	# if 'q' in request.GET and request.GET['q']:
+	#     q = request.GET['q']
+	#     reports= Report.objects.filter(short__icontains=q)  #initializes reports
+	#     for words in q.split():
+	#         r1 = Report.objects.filter(short__icontains=words)
+	#         r2 = Report.objects.filter(location__icontains=words)
+	#         # r4 = Report.objects.filter(keyword__word__icontains=q)
+	#         reports = reports | (r1 | r2)
+	#     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
+	#     reports = reports & r3
+	#     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+	# else:
+	#     reports= Report.objects.filter(privacy=False)
+	#     # if user is admin reports= Report.objects.all
+	# return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 def search2(request):
-    if 'q' in request.GET and request.GET['q']:
-        q = request.GET['q']
-        reports= Report.objects.filter(privacy=False)
-        for words in q.split():
-            r1 = Report.objects.filter(short__icontains=words)
-            r2 = Report.objects.filter(location__icontains=words)
-            reports = reports & (r1 | r2)
+	if 'q' in request.GET and request.GET['q']:
+		q = request.GET['q']
+		reports= Report.objects.filter(privacy=False)
+		for words in q.split():
+			r1 = Report.objects.filter(short__icontains=words)
+			r2 = Report.objects.filter(location__icontains=words)
+			reports = reports & (r1 | r2)
 
-        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    else:
-        reports=Report.objects.filter(privacy=False)
-        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+		return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+	else:
+		reports=Report.objects.filter(privacy=False)
+		return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 
 #The following methods are ONLY for the command line interface

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Secure Witness Add Keyword</title>   
+    </head>
+    <body>
+    <!-- List of report keywords -->
+    <h2>Keywords:</h2>
+    {% if keywords %}
+        <ul>
+        {% for keyword in keywords %}
+            <li>{{keyword.name}}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No keywords.</p>
+    {% endif %}
+
+        <p>{{reportid}}</p>
+        <!-- Upload form. Note enctype attribute! -->
+        <form action="/SecureWitness/editReport/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p><input type="text" name="newword" /></p>
+            <p><input type="hidden" value={{reportid}} name="report"></p>
+            <p><input type="submit" value="Add Keyword" /></p>
+        </form>
+    </body>
+</html> 
+<br>
+<a href="/SecureWitness/">Home</a>

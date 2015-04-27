@@ -84,8 +84,11 @@ class EditForm(forms.ModelForm):
 		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
 	class Meta:
 		model = Report
-		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups')
+		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups', 'keyword')
 		widgets = {'author':forms.HiddenInput()}
+
+class KeywordForm(forms.Form):
+	newword = forms.CharField(label = 'New Keyword')
 
 class FolderForm(forms.ModelForm):
 	def __init__(self, current_user, *args, **kwargs):

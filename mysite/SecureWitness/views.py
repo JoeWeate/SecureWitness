@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, KeywordForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -255,12 +255,32 @@ def editReport(request):
 		raise Http404("Report does not exist")
 	context = RequestContext(request)
 	edit_form = EditForm(current_user,instance=report)
+	author = request.user
+	keywords = report.keyword.all()
+
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
 	shared_groups = report.groups.all()
 	group_form = GroupForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
+	return render_to_response('SecureWitness/editReport.html', {'author': author, 'reportid': report_id, 'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'keyword': keywords, 'group_form': group_form}, context)
+
+@login_required
+def addkeyword(request):
+	context = RequestContext(request)
+	if request.method == 'POST':
+		report_id = request.POST['reportid']
+		try:
+			report = Report.objects.get(pk=report_id)
+			keywords = report.keyword.all()
+		except Report.DoesNotExist:
+			raise Http404("Report does not exist")
+		keyform = KeywordForm()
+	else:
+		keyform = KeywordForm()
+
+	return redirect('SecureWitness/editReport.html')
+
 
 @login_required
 def create(request):

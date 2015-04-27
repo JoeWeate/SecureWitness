@@ -269,7 +269,8 @@ def viewReport(request):
 	comment_form = CommentForm(initial = {'author':current_user, 'report':report})
 	delete_report_form = DeleteReportForm(report_id)
 	comments = Comment.objects.filter(report = report).order_by('-pub_date')[:10]
-	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments, 'delete_report_form': delete_report_form}, context)
+	documents = report.doc.all()
+	return render_to_response('SecureWitness/viewReport.html', {'report': report, 'current_user': current_user, 'comment_form':comment_form, 'comments':comments, 'documents': documents, 'delete_report_form': delete_report_form}, context)
 
 
 # View for an author to edit a selected report's fields

@@ -1,8 +1,7 @@
 {% load securewitness_extras %}
 
 <h2>Welcome {{current_user.username}}!</h2>
-<br>
-
+<h4>Search:</h4>
 <form id="search_form" method="post" action="/SecureWitness/search/">
     {% csrf_token %}
     {{ search_form.as_p }}

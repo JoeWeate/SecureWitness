@@ -17,6 +17,7 @@
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
 
+
 <h2>Comments:</h2>
 {% for comment in comments %}
 <li>{{comment}} -by {{comment.author}} at {{comment.pub_date}} <a href = '/SecureWitness/commentDelete/{{comment.id}}'>Delete</a></li>

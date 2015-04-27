@@ -65,7 +65,12 @@ class ReportForm(forms.ModelForm):
 	class Meta:
 		model = Report
 		fields = ('inc_date', 'author', 'short', 'detailed', 'privacy', 'doc', 'location')
-		widgets = {'author':forms.HiddenInput()}
+		widgets = {'author':forms.HiddenInput(),'inc_date':forms.HiddenInput()}
+
+class DeleteReportForm(forms.ModelForm):
+	class Meta:
+		model = Report
+		fields = {}
 
 class CommentForm(forms.ModelForm):
 	class Meta:

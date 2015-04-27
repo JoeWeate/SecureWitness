@@ -57,8 +57,10 @@ def index(request):
 		public_reports_form = SelectReportForm(public_list)
 		# Generate a form to view a selected shared report
 		shared_reports_form = SelectReportForm(shared_list)
+		all_report = Report.objects.order_by('-pub_date')
+		all_reports_form = SelectReportForm(all_report)
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
-		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form})
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form,'all_reports_form':all_reports_form,'all_report':all_report})
 
 def register(request):
 	# Like before, get the request's context.
@@ -348,6 +350,15 @@ def create(request):
 	return render_to_response('SecureWitness/create.html', {'report_form':report_form}, context)
 
 @login_required
+def create1(request):
+	context = RequestContext(request)
+	current_user = request.user
+	# documents = Document.objects.filter(author=current_user)
+	report_form = ReportForm(current_user, initial = {'author':current_user, 'inc_date':datetime.datetime.today})
+	return render_to_response('SecureWitness/create1.html', {'report_form':report_form}, context)
+
+
+@login_required
 def createSuccess(request):
 	context = RequestContext(request)
 	current_user = request.user
@@ -355,7 +366,10 @@ def createSuccess(request):
 	report_form = ReportForm(documents, data = request.POST)
 	if report_form.is_valid():
 		report = report_form.save()
-	return render(request, 'SecureWitness/success.html')
+		return render(request, 'SecureWitness/success.html')
+	else:
+		return HttpResponseRedirect('/SecureWitness/create1')
+	
 
 
 
@@ -372,7 +386,7 @@ def commentDelete(request, comment_id):
 		report.delete()
 	except Report.DoesNotExist:
 		raise Http404("Comment does not exist")
-	return render(request, 'SecureWitness/success.html')
+	return render(request, '/SecureWitness/success.html')
 
 @login_required
 def delete(request,report_id):
@@ -381,7 +395,7 @@ def delete(request,report_id):
 		report.delete()
 	except Report.DoesNotExist:
 		raise Http404("Report does not exist")
-	return render(request, 'SecureWitness/success.html')
+	return HttpResponseRedirect('/SecureWitness/')
 
 @login_required
 def folder(request,folder_id):

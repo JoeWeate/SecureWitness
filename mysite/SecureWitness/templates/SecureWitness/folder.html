@@ -1,13 +1,15 @@
-{{folder.name}}
-<br>
+<h2>Folder: {{folder.name}}</h2>
 
 {% if report_list %}
-    <ul>
+    <form id="folder_report" method="post" action='/SecureWitness/viewReport/'>
+    {% csrf_token%}
+    <select name = 'report'>
     {% for report in report_list %}
-        <li><a href="/SecureWitness/{{ report.id }}/">{{ report.short }}</a></li>
+        <option value = {{report.id}}>{{report.short}}</option>
     {% endfor %}
-
-    </ul>
+    </select>
+    <input type="submit" name="submit" value="view selected report">
+    </form>
 {% else %}
     <p>No reports are available.</p>
 {% endif %}

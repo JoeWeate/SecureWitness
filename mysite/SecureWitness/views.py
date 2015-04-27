@@ -244,8 +244,11 @@ def addUserSuccess(request):
 	user_id = request.POST.get('user')
 	group = Group.objects.get(id=group_id)
 	user = User.objects.get(id=user_id)
-	group.user_set.add(user)
-	return render_to_response('SecureWitness/success.html')
+	if user not in group.user_set.all():
+		group.user_set.add(user)
+		return render_to_response('SecureWitness/success.html')
+	else:
+		return render_to_response('SecureWitness/addFail.html')
 
 @login_required
 @csrf_exempt
@@ -254,8 +257,11 @@ def removeUserSuccess(request):
 	user_id = request.POST.get('user2')
 	group = Group.objects.get(id=group_id)
 	user = User.objects.get(id=user_id)
-	group.user_set.remove(user)
-	return render_to_response('SecureWitness/success.html')
+	if user in group.user_set.all():
+		group.user_set.remove(user)
+		return render_to_response('SecureWitness/success.html')
+	else:
+		return render_to_response('SecureWitness/removeFail.html')
 # View displaying a report that user has access to
 @login_required
 def viewReport(request):

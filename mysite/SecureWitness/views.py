@@ -434,13 +434,10 @@ def addAdmin(request):
 def suspendUser(request):
 	context = RequestContext(request)
 	current_user = request.user
-	suspended, created = Group.objects.get_or_create(name="suspended")
-	members = suspended.user_set.all()
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		user.is_active = False
 		user.save()
-		suspended.user_set.add(user)
 	add_user_form = AddUserForm()
 	return render_to_response('SecureWitness/suspendUser.html', {'current_user': current_user, 'add_user_form': add_user_form, 'members': members}, context)
 
@@ -448,13 +445,11 @@ def suspendUser(request):
 def reactivateUser(request):
 	context = RequestContext(request)
 	current_user = request.user
-	suspended, created = Group.objects.get_or_create(name="suspended")
-	members = suspended.user_set.all()
+	members = User.objects.filter(is_active=False)
 	if request.method == 'POST':
 		user = User.objects.get(pk=request.POST['users'])
 		user.is_active = True
 		user.save()
-		suspended.user_set.remove(user)
 	reactivate_user_form = ReactivateUserForm(members)
 	return render_to_response('SecureWitness/reactivateUser.html', {'current_user': current_user, 'reactivate_user_form': reactivate_user_form, 'members': members}, context)
 

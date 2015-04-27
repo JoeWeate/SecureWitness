@@ -3,6 +3,12 @@
 <h2>Welcome {{current_user.username}}!</h2>
 <br>
 
+<form id="search_form" method="post" action="/SecureWitness/search/">
+    {% csrf_token %}
+    {{ search_form.as_p }}
+    <input type="submit" value="Search"/>
+</form>
+
 
 <form method="get" action="/SecureWitness/search/">
     {% csrf_token %}

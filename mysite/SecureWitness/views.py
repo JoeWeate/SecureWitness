@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -40,6 +40,25 @@ import json
 
 @login_required
 def index(request):
+<<<<<<< HEAD
+	current_user = request.user
+	report_list = Report.objects.filter(author = request.user).order_by('-pub_date')
+	edit_report_form = SelectReportForm(report_list)
+	folder_list = Folder.objects.filter(owner = request.user).order_by('-pub_date')
+	# Get all reports that have public access
+	public_list = Report.objects.filter(privacy=False)
+	# Get all groups that current user is a member of
+	user_groups = current_user.groups.all()
+	# Get all private reports that have been shared with current user by group association
+	shared_list = Report.objects.filter(groups__in=user_groups)
+	# Generate a form to view a selected public report
+	public_reports_form = SelectReportForm(public_list)
+	# Generate a form to view a selected shared report
+	shared_reports_form = SelectReportForm(shared_list)
+	search_form = SearchForm()
+	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
+		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form, 'search_form': search_form})
+=======
 	if not request.user.is_authenticated():
 		return redirect('/accounts/login/')
 	else:
@@ -61,6 +80,7 @@ def index(request):
 		all_reports_form = SelectReportForm(all_report)
 	return render(request,'SecureWitness/index.html',{'edit_report_form': edit_report_form, 'report_list': report_list,
 		'current_user': current_user,'folder_list':folder_list, 'public_reports_form': public_reports_form, 'shared_reports_form': shared_reports_form,'all_reports_form':all_reports_form,'all_report':all_report})
+>>>>>>> 1067735ee048c7fb42e96a378613ab497b3899de
 
 def register(request):
 	# Like before, get the request's context.
@@ -464,21 +484,109 @@ def reactivateUser(request):
 
 
 def search(request):
-    if 'q' in request.GET and request.GET['q']:
-        q = request.GET['q']
-        reports= Report.objects.filter(short__icontains=q)  #initializes reports
-        for words in q.split():
-            r1 = Report.objects.filter(short__icontains=words)
-            r2 = Report.objects.filter(location__icontains=words)
-            # r4 = Report.objects.filter(keyword__word__icontains=q)
-            reports = reports | (r1 | r2)
-        r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-        reports = reports & r3
-        return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-    else:
-        reports= Report.objects.filter(privacy=False)
-        # if user is admin reports= Report.objects.all
-        return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
+	context = RequestContext(request)
+	current_user = request.user
+	if request.method == 'POST':
+		query = request.POST['query']
+		queries = query.split()
+		# i = 0
+		# ors = []
+		# nots = []
+		# ands = []
+		# while i > terms.size():
+		# 	if terms[i] == "OR":
+		# 		ors.add(terms[i+1])
+		# 		terms.remove(i)
+		# 		terms.remove(i)
+		# 	if terms[i] == "NOT":
+		# 		nots.add(terms[i+1])
+		# 		terms.remove(i)
+		# 		terms.remove(i)
+		# 	if terms[i] == "AND":
+		# 		ands.add(terms[i+1])
+		# 		terms.remove(i)
+		# 		terms.remove(i)
+		# 	i = i + 1
+		results = []
+		available = []
+		if current_user.groups.filter(name="admins").exists():
+			available.extend(Report.objects.all())
+		else:
+			available = list(Report.objects.filter(privacy=False))
+			groups = current_user.groups.all()
+			group_reports = []
+			for g in groups:
+				group_reports.extend(Report.objects.filter(groups=g))
+			for r in group_reports:
+				if r not in available:
+					available.append(r)
+		author = []
+		shorts = []
+		detailed = []
+		location = []
+		keyword = []
+		and_search = False
+		if request.POST['boolean_terms'] == "True":
+			and_search = True
+		if not and_search:
+			if 'short' in request.POST:
+				for q in queries:
+					shorts.extend(Report.objects.filter(short__icontains=q))
+			if 'detailed' in request.POST:
+				for q in queries:
+					detailed.extend(Report.objects.filter(detailed__icontains=q))
+			if 'location' in request.POST:
+				for q in queries:
+					location.extend(Report.objects.filter(location__icontains=q))
+			if 'author' in request.POST:
+				for q in queries:
+					author.extend(Report.objects.filter(author__username__icontains=q))
+			if 'keyword' in request.POST:
+				for q in queries:
+					keyword.extend(Report.objects.filter(keyword__word__icontains=q))
+			all_results = set(shorts + detailed + location + author + keyword)
+			for r in all_results:
+				if r in available:
+					results.append(r)
+		else:
+			not_found = False
+			for q in queries:
+				shorts = []
+				detailed = []
+				location = []
+				author = []
+				keyword = []
+				if 'short' in request.POST:
+					shorts.extend(Report.objects.filter(short__icontains=q))
+				if 'detailed' in request.POST:
+					detailed.extend(Report.objects.filter(detailed__icontains=q))
+				if 'location' in request.POST:
+					location.extend(Report.objects.filter(location__icontains=q))
+				if 'author' in request.POST:
+					author.extend(Report.objects.filter(author__username__icontains=q))
+				if 'keyword' in request.POST:
+					keyword.extend(Report.objects.filter(keyword__word__icontains=q))
+				query_results = set(shorts + detailed + location + author + keyword)
+				for r in available:
+					if r not in query_results:
+						available.remove(r)
+			results = available
+		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query}, context)
+    # if 'q' in request.GET and request.GET['q']:
+    #     q = request.GET['q']
+    #     reports= Report.objects.filter(short__icontains=q)  #initializes reports
+    #     for words in q.split():
+    #         r1 = Report.objects.filter(short__icontains=words)
+    #         r2 = Report.objects.filter(location__icontains=words)
+    #         # r4 = Report.objects.filter(keyword__word__icontains=q)
+    #         reports = reports | (r1 | r2)
+    #     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
+    #     reports = reports & r3
+    #     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
+    # else:
+    #     reports= Report.objects.filter(privacy=False)
+    #     # if user is admin reports= Report.objects.all
+    # return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 def search2(request):
     if 'q' in request.GET and request.GET['q']:

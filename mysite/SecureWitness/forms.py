@@ -100,3 +100,12 @@ class FolderForm(forms.ModelForm):
 		model = Folder
 		fields = ('name', 'reports', 'owner')
 		widgets = {'owner':forms.HiddenInput()}
+
+class SearchForm(forms.Form):
+	query = forms.CharField(max_length=200)
+	short = forms.BooleanField()
+	detailed = forms.BooleanField()
+	location = forms.BooleanField()
+	author = forms.BooleanField()
+	keyword = forms.BooleanField()
+	boolean_terms = forms.ChoiceField(choices = [(True, "Search with AND between terms"), (False, "Search with OR between terms")])

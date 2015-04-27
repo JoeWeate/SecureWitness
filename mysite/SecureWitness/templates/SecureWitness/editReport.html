@@ -46,28 +46,55 @@
 		<input type ="hidden" value={{report_id}} name="rid">
 		<input type="submit" name="submit" value="Save" />
 </form>
+<table>
+	<tr>	
+		<form action='/SecureWitness/keyword/' method="post" enctype="multipart/form-data">
+			{% csrf_token%}
+			<td>
+				<input type="text"   name="newkey">
+				<input type ="hidden" value={{report_id}} name="rid">
+			</td>
+			<td>
+		    	<input type="submit" value="Add Keyword" >
+		    </td>
+		</form>
+	</tr>
+</table>
 
-<form action='/SecureWitness/keyword/' method="post" enctype="multipart/form-data">
-	{% csrf_token%}
-	<input type="text"   name="newkey">
-	<input type ="hidden" value={{report_id}} name="rid">
-    <input type="submit" value="Add Keyword" >
-</form>
+<table>
+	<tr><td>
+	<form action='/SecureWitness/adddoc/' method="post" enctype="multipart/form-data">
+		{% csrf_token%}
+		<tr><td>Add new file: </td></tr>
+		<tr>
+			<td>Uploaded File Name: </td>
+			<td><input type="text"   name="name"  > </td>
+		</tr>
+		<tr>
+			<td>
+				<input type="file"   name="newdoc">
+				<input type ="hidden" value={{report_id}} name="rid">
+			</td>
+			<td>
+			    <input type="submit" value="Add File" >
+			</td>
+		</tr>
 
-<form action='/SecureWitness/adddoc/' method="post" enctype="multipart/form-data">
-	{% csrf_token%}
-	Add new file: <br>
-	Uploaded File Name: <input type="text"   name="name"  > <br>
-	<input type="file"   name="newdoc">
-	<input type ="hidden" value={{report_id}} name="rid">
-    <input type="submit" value="Add File" >
-</form>
-
-<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
-	{% csrf_token %}
-	{{ delete_report_form.as_p }}
-    <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
-</form>
+	</form>
+	</td></tr>
+</table>
+<br>
+<table>
+	<tr>
+		<td>
+			<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ delete_report_form.as_p }}
+			    <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
+			</form>
+		</td>
+	</tr>
+</table>
 
 <a href="/SecureWitness/createKeyword">Create new keyword</a>
 

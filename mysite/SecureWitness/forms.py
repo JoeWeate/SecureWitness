@@ -122,4 +122,6 @@ class SearchForm(forms.Form):
 	location = forms.BooleanField()
 	author = forms.BooleanField()
 	keyword = forms.BooleanField()
-	boolean_terms = forms.ChoiceField(choices = [(True, "Search with AND between terms"), (False, "Search with OR between terms")])
+	# exclude = forms.BooleanField()
+	# not_terms = forms.CharField(max_length=200)
+	boolean_terms = forms.ChoiceField(choices = [(True, "Search with AND between query terms"), (False, "Search with OR between query terms")])

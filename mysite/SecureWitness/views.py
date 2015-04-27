@@ -508,7 +508,8 @@ def search(request):
 		if current_user.groups.filter(name="admins").exists():
 			available.extend(Report.objects.all())
 		else:
-			available = list(Report.objects.filter(privacy=False))
+			available.extend(Report.objects.filter(privacy=False))
+			available.extend(Report.objects.filter(author=current_user))
 			groups = current_user.groups.all()
 			group_reports = []
 			for g in groups:
@@ -545,44 +546,33 @@ def search(request):
 				if r in available:
 					results.append(r)
 		else:
-			not_found = False
-			for q in queries:
-				shorts = []
-				detailed = []
-				location = []
-				author = []
-				keyword = []
-				if 'short' in request.POST:
-					shorts.extend(Report.objects.filter(short__icontains=q))
-				if 'detailed' in request.POST:
-					detailed.extend(Report.objects.filter(detailed__icontains=q))
-				if 'location' in request.POST:
-					location.extend(Report.objects.filter(location__icontains=q))
-				if 'author' in request.POST:
-					author.extend(Report.objects.filter(author__username__icontains=q))
-				if 'keyword' in request.POST:
-					keyword.extend(Report.objects.filter(keyword__word__icontains=q))
-				query_results = set(shorts + detailed + location + author + keyword)
-				for r in available:
-					if r not in query_results:
-						available.remove(r)
-			results = available
+			for r in available:
+				not_found = False
+				for q in queries:
+					match = False
+					if 'short' in request.POST:
+						if q in r.short:
+							match = True
+					if 'detailed' in request.POST:
+						if q in r.detailed:
+							match = True
+					if 'location' in request.POST:
+						if q in r.location:
+							match = True
+					if 'author' in request.POST:
+						if q in r.author.username:
+							match = True
+					if 'keyword' in request.POST:
+						keywords = r.keyword.all()
+						for k in keywords:
+							if q in k.word:
+								match = True
+					if match == False:
+						not_found = True
+						break
+				if not_found == False:
+					results.append(r)
 		return render_to_response('SecureWitness/search_results.html', {'results': results, 'query': query}, context)
-	# if 'q' in request.GET and request.GET['q']:
-	#     q = request.GET['q']
-	#     reports= Report.objects.filter(short__icontains=q)  #initializes reports
-	#     for words in q.split():
-	#         r1 = Report.objects.filter(short__icontains=words)
-	#         r2 = Report.objects.filter(location__icontains=words)
-	#         # r4 = Report.objects.filter(keyword__word__icontains=q)
-	#         reports = reports | (r1 | r2)
-	#     r3 = Report.objects.filter(privacy=False) #only lets you see NON private reports
-	#     reports = reports & r3
-	#     return render(request, 'SecureWitness/search_results.html', {'reports': reports, 'query': q})
-	# else:
-	#     reports= Report.objects.filter(privacy=False)
-	#     # if user is admin reports= Report.objects.all
-	# return render(request, 'SecureWitness/search_results2.html', {'reports': reports})
 
 def search2(request):
 	if 'q' in request.GET and request.GET['q']:

@@ -1,105 +1,15 @@
-<h2>Current Content</h2>
+<h2>Edit Content:</h2>
 
 <form id="edit_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
 		{% csrf_token%}
-		<table id="form_editor">
-			<tr>
-				<td>Report Title:  </td>
-				<td>{{edit_form.short}}</td>
-			</tr>
-			<tr>
-				<td>Author: </td>
-				<td>{{author}}</td>
-			</tr>
-			<tr>
-				<td>Incident Date: </td>
-				<td>{{edit_form.inc_date}}</td>
-			</tr>
-			<tr>
-				<td>Description: </td>
-				<td>{{edit_form.detailed}}</td>
-			</tr>
-			<tr>
-				<td>Location: </td>
-				<td>{{edit_form.location}}</td>
-			</tr>
-			<tr>
-				<td>Files: </td>
-				<td>{{edit_form.doc}}</td>
-				<td>Add File</td>
-			</tr>
-			<tr>
-				<td>Groups: </td>
-				<td>{{edit_form.groups}}</td>
-				<td>Add Group</td>
-			</tr>
-			<tr>
-				<td>Keywords: </td>
-				<td>{{edit_form.keyword}}</td>
-			</tr>
-			<tr>
-				<td>Privacy: </td>
-				<td>{{edit_form.privacy}}</td>
-			</tr>
-		</table>
-
+		{{ edit_form.as_p }}
 		<input type ="hidden" value={{report_id}} name="rid">
-		<input type="submit" name="submit" value="Save" />
+		<input type="submit" name="submit" value="Edit Report" />
 </form>
 
-<h3>Keyword Addition:</h3>
-<table>
-	<tr>	
-		<form action='/SecureWitness/keyword/' method="post" enctype="multipart/form-data">
-			{% csrf_token%}
-			<td>
-				<input type="text"   name="newkey">
-				<input type ="hidden" value={{report_id}} name="rid">
-			</td>
-			<td>
-		    	<input type="submit" value="Add Keyword" >
-		    </td>
-		</form>
-	</tr>
-</table>
-
-
-<h3>Document Addition:</h3>
-<table>
-	<form action='/SecureWitness/adddoc/' method="post" enctype="multipart/form-data">
-		{% csrf_token%}
-		<tr><td>Add new file: </td></tr>
-		<tr>
-			<td>Uploaded File Name: </td>
-			<td><input type="text"   name="name"  > </td>
-		</tr>
-		<tr>
-			<td>
-				<input type="file"   name="newdoc">
-				<input type ="hidden" value={{report_id}} name="rid">
-			</td>
-			<td>
-			    <input type="submit" value="Add File" >
-			</td>
-		</tr>
-
-	</form>
-</table>
-<br>
-
-<h3>Report Deletion:</h3>
-<table>
-	<tr>
-		<td>
-			<form id="delete_report_form" action='/SecureWitness/deleteReport/' method="post" enctype="multipart/form-data">
-				{% csrf_token %}
-				{{ delete_report_form.as_p }}
-			    <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
-			</form>
-		</td>
-	</tr>
-</table>
-
+<form action='/SecureWitness/delete/{{report.id}}'>
+    <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
+</form>
 <a href="/SecureWitness/createKeyword">Create new keyword</a>
 
 <h2>Comments:</h2>

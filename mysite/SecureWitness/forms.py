@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.models import Report,Folder, Document, Comment, Keyword
+from SecureWitness.models import Report,Folder, Document, Comment
 from django import forms
 
 class UserForm(forms.ModelForm):
@@ -84,10 +84,9 @@ class SelectReportForm(forms.Form):
 		self.fields['report'] = forms.ChoiceField(choices = [ (r.id, str(r)) for r in reports])
 
 class EditForm(forms.ModelForm):
-	def __init__(self, current_user, report, *args, **kwargs):
+	def __init__(self, current_user, *args, **kwargs):
 		super(EditForm, self).__init__(*args, **kwargs)
 		self.fields['doc'].queryset = Document.objects.filter(author = current_user)
-		self.fields['keyword'].queryset = report.keyword.all()
 	class Meta:
 		model = Report
 		fields = ('author', 'inc_date', 'short', 'detailed', 'privacy', 'doc', 'location', 'groups', 'keyword')

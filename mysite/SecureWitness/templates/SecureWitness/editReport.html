@@ -2,7 +2,9 @@
 
 <form id="edit_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
 		{% csrf_token%}
-		<table id="form_editor">
+<<<<<<< HEAD
+		<!--{{ edit_form.as_p }}-->
+		<table>
 			<tr>
 				<td>Report Title:  </td>
 				<td>{{edit_form.short}}</td>
@@ -36,6 +38,13 @@
 			<tr>
 				<td>Keywords: </td>
 				<td>{{edit_form.keyword}}</td>
+				<td>
+					<form action='/SecureWitness/keyword.html'>
+						<input type="hidden" value={{reportid}} name="report"/>
+    					<input type="text"   name ="keyword">
+						<input type="submit" value="Add Keyword">
+					</form>
+				</td>
 			</tr>
 			<tr>
 				<td>Privacy: </td>
@@ -47,24 +56,7 @@
 		<input type="submit" name="submit" value="Save" />
 </form>
 
-<form action='/SecureWitness/keyword/' method="post" enctype="multipart/form-data">
-	{% csrf_token%}
-	<input type="text"   name="newkey">
-	<input type ="hidden" value={{report_id}} name="rid">
-    <input type="submit" value="Add Keyword" >
-</form>
-
-<form action='/SecureWitness/adddoc/' method="post" enctype="multipart/form-data">
-	{% csrf_token%}
-	Add new file: <br>
-	Uploaded File Name: <input type="text"   name="name"  > <br>
-	<input type="file"   name="newdoc">
-	<input type ="hidden" value={{report_id}} name="rid">
-    <input type="submit" value="Add File" >
-</form>
-
 <form action='/SecureWitness/delete/{{report.id}}'>
-	{% csrf_token%}	
     <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
 </form>
 

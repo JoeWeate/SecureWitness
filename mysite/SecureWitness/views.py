@@ -330,7 +330,7 @@ def addkeyword(request):
 	else:
 		keyform = KeywordForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
+	return render_to_response('SecureWitness/success.html', context)
 
 
 @login_required
@@ -368,7 +368,7 @@ def adddoc(request):
 	else:
 		keyform = KeywordForm()
 
-	return render_to_response('SecureWitness/editReport.html', {'author': author, 'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form, 'delete_report_form': delete_report_form}, context)
+	return render_to_response('SecureWitness/success.html', context)
 
 @login_required
 def createKeyword(request):

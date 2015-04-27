@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
-from SecureWitness.models import Report, Document, Folder, UserProfile, Comment
+from SecureWitness.models import Report, Document, Folder, UserProfile, Comment, Keyword
 
 from django.contrib.auth.models import User, Group, Permission
-from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm
+from SecureWitness.forms import DocumentForm, ReportForm, GroupForm, UserForm, AddUserForm, EditForm, FolderForm, ReactivateUserForm, SelectReportForm, LoginForm, CommentForm, SearchForm, KeywordForm
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -296,7 +296,20 @@ def editReport(request):
 
 	return render_to_response('SecureWitness/editReport.html', {'report_id':report_id,'edit_form':edit_form, 'report':report, 'comment_form':comment_form, 'comments': comments, 'shared_groups': shared_groups, 'group_form': group_form}, context)
 
-
+@login_required
+def createKeyword(request):
+	current_user = request.user
+	context = RequestContext(request)
+	success = False
+	if request.POST:
+		keyword_form = KeywordForm(data=request.POST)
+		if keyword_form.is_valid():
+			keyword_form.save()
+			success = True
+	else:
+		keyword_form = KeywordForm()
+	keywords = Keyword.objects.all()
+	return render_to_response('SecureWitness/createKeyword.html', {'keyword_form': keyword_form, 'current_user': current_user, 'keywords': keywords, 'success': success}, context)
 
 @login_required
 def success(request):

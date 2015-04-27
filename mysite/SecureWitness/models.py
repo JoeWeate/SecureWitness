@@ -37,15 +37,15 @@ class Report(models.Model):
 	# Date and time of incident
 	inc_date = models.DateTimeField(null=True, blank=True)
 	# Short description (1 line)
-	short = models.CharField(max_length=200,default="default short")
+	short = models.CharField(max_length=200)
 	# Detailed description
-	detailed = models.CharField(max_length=2000,default="default detail")
+	detailed = models.CharField(max_length=2000)
 	# Privacy setting (default private)
 	privacy = models.BooleanField(default=True)
 	# Optional document field for uploading one or more documents
 	doc = models.ManyToManyField(Document,null=True,blank=True)
 	# Optional location char field
-	location = models.CharField(max_length=200,blank=True, default="default location")
+	location = models.CharField(max_length=200,null=True,blank=True)
 	# Optional keywords associated with report
 	keyword = models.ManyToManyField(Keyword,null=True,blank=True)
 	# Optional group associated with report,

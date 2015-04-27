@@ -1,7 +1,12 @@
 {% load securewitness_extras %}
 
 <h2>Welcome {{current_user.username}}!</h2>
-<br>
+<h4>Search:</h4>
+<form id="search_form" method="post" action="/SecureWitness/search/">
+    {% csrf_token %}
+    {{ search_form.as_p }}
+    <input type="submit" value="Search"/>
+</form>
 
 
 <form method="get" action="/SecureWitness/search/">
@@ -18,9 +23,9 @@
 </form>
 
 
-My Reports:
+<h4>My Reports:</h4>
 {% if report_list %}
-    <form id="edit_report_form" method="post" action="/SecureWitness/editReport/" enctype="multipart/form-data">
+    <form id="edit_report_form" method="get" action="/SecureWitness/editReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ edit_report_form.as_p }}
 
@@ -30,12 +35,7 @@ My Reports:
     <p><t/>No reports are available.</p>
 {% endif %}
 
-
-<br>
-
-
-My Folders:
-<br>
+<h4>My Folders:</h4>
 {% if folder_list %}
     <ul>
     {% for folder in folder_list %}
@@ -46,8 +46,8 @@ My Folders:
 {% else %}
     <p>   No folders are available.</p>
 {% endif %}
-<br>
-Public reports:
+
+<h4>Public reports:</h4>
 <form id="public_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ public_reports_form.as_p }}
@@ -55,7 +55,7 @@ Public reports:
     <input type="submit" name="submit" value="View selected Report" />
 </form>
 <br>
-Reports shared with me (public and private):
+<h4>Reports shared with me (public and private):</h4>
 <form id="shared_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
     {% csrf_token %}
     {{ shared_reports_form.as_p }}
@@ -64,9 +64,9 @@ Reports shared with me (public and private):
 </form>
 
 
-<!-- {% for folder in folder_list %}
+{% for folder in folder_list %}
     	<li>{{folder.name}}</li>
-{% endfor %} -->
+{% endfor %}
 
 <a href="create">Create Report</a>
 <br>
@@ -78,10 +78,14 @@ Reports shared with me (public and private):
 <br>
 <br>
 {% if current_user|has_group:"admins" %}
-Admin functions:
-<br>
-<a href="viewAllReports">View all reports</a>
-<br>
+<h3>Admin functions:</h3>
+<h4>All Reports:</h4>
+<form id="all_reports_form" method="post" action="/SecureWitness/viewReport/" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ all_reports_form.as_p }}
+
+    <input type="submit" name="submit" value="View selected Report" />
+</form>
 <a href="groupCreate">Create a Group</a>
 <br>
 <a href="addAdmin">Make another user an admin</a>
@@ -90,6 +94,8 @@ Admin functions:
 <br>
 <a href="reactivateUser">Reactivate a user</a>
 <br>
+<a href="addUser">Add/Remove User to/from a Group</a>
 <br>
 {% endif %}
+<br>
 <a href="logout">Logout</a>

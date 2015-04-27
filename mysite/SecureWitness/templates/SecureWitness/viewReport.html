@@ -1,3 +1,4 @@
+{% load securewitness_extras %}
 Report: {{ report.id }}
 <br>
 Short description: {{ report.short }}
@@ -28,3 +29,9 @@ No comments yet!
 
 		<input type="submit" name="submit" value="Add Comment" />
 </form>
+
+{% if current_user|has_group:"admins" %}
+<form action='/SecureWitness/delete/{{report.id}}'>
+    <input type="submit" value="Delete Report" onclick="return confirm('Are you sure to delete this report?')">
+</form>
+{% endif %}
